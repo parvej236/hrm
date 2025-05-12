@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Print Leave Application</title>
+    <script type="text/javascript" th:src="@{/resources/js/pdfmake.min.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/vfs/noto-sans-english.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/vfs/noto-sans-bengali.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header">Print Leave Application</h4>
+<div class="w-50" layout:fragment="content">
+    <div class="row">
+        <div class="col-2">
+            <img height="85px" width="85px" src="/resources/img/quantum_logo_head.png" alt="Quantum Logo">
+        </div>
+        <div class="text-center col-8">
+            <div class="fw-bold fs-4">কোয়ান্টাম ফাউন্ডেশন</div>
+            <div class="fw-bold fs-5"><span th:text="${leave.applicant.departmentName}"></span>, <span
+                    th:text="${leave.applicant.branchName}"></span></div>
+            <div class="badge bg-dark fs-6">ছুটির আবেদনপত্র</div>
+        </div>
+    </div>
+
+    <div class="mb-2 mt-4">তারিখ: <span class="fw-bold text-decoration-underline" th:text="${leave.applyDate}"></span>
+    </div>
+
+    <div class="mb-2">
+        বরাবর<br/>
+        এইচ.আর.ও<br/>
+        কোয়ান্টাম ফাউন্ডেশন<br/>
+        শান্তিনগর, ঢাকা- ১২১৭
+    </div>
+
+    <div class="mb-2">বিষয়: <span th:text="${leave.leaveDays}" class="text-decoration-underline fw-bold"></span>
+        (<span class="fw-bold text-decoration-underline" th:text="${leaveDaysInWord}"></span>) দিন ছুটির আবেদন।
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-6 text-start">নাম: <span class="fw-bold" th:text="${leave.applicant.nameEn}"></span></div>
+        <div class="col-6 text-end">পদবি: <span class="fw-bold" th:text="${leave.applicant.designationName}"></span>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-6 text-start">অর্গান/সেল: <span class="fw-bold"
+                                                        th:text="${leave.applicant.departmentName}"></span>, <span
+                class="fw-bold"
+                th:text="${leave.applicant.branchName}"></span></div>
+        <div class="col-6 text-end">মোবাইল: <span class="fw-bold" th:text="${leave.applicant.primaryPhone}"></span>
+        </div>
+    </div>
+
+    <div class="mb-2">ছুটির কারণ: <span class="text-decoration-underline fw-bold" th:text="${leave.leaveReason}"></span>
+    </div>
+
+    <div class="mb-2" style="text-align: justify">
+        উপরোক্ত কারণে আমাকে <span class="text-decoration-underline fw-bold" th:text="${leave.leaveFrom}"></span> হতে
+        <span class="fw-bold text-decoration-underline" th:text="${leave.leaveTo}"></span> তারিখ পর্যন্ত
+        ছুটি প্রদান করলে কৃতজ্ঞ থাকব এবং যথাসময়ে কর্মস্থলে রিপোর্ট করতে না পারলে
+        কর্তৃপক্ষের যে-কোন সিদ্ধান্ত মেনে নেব। আমার ছুটিকালীন আমার দায়িত্ব
+        পালন করবেন <span class="fw-bold text-decoration-underline" th:text="${leave.responsible.nameEn}"></span>। জরুরি
+        প্রয়োজনে আমাকে ফোনে পাওয়া
+        না গেলে যার সাথে যোগাযোগ করা যাবে - মোবাইল: <span class="text-decoration-underline fw-bold"
+                                                          th:text="${leave.alternateContactPhone}"></span><br>
+        <div class="row mb-2 mt-2">
+            <div class="col-6 text-start">নাম: <span class="text-decoration-underline fw-bold"
+                                                     th:text="${leave.alternateContactName}"></span></div>
+            <div class="col-6 text-end">সম্পর্ক: <span class="fw-bold text-decoration-underline"
+                                                       th:text="${leave.relationWith}"></span></div>
+        </div>
+    </div>
+
+    <div class="mb-2">নিবেদক</div>
+    <div class="row">
+        <div class="col-4 text-center">
+            <div th:text="${leave.applicant.nameEn}"></div>
+            <hr class="mb-0 mt-0">
+            <div>Applicant</div>
+        </div>
+        <div class="col-4 text-center">
+            <div th:text="${leave.authorizedByName}"></div>
+            <hr class="mb-0 mt-0">
+            <div>Authorized By</div>
+        </div>
+        <div class="col-4 text-center">
+            <div>Maisha Tabassum</div>
+            <hr class="mb-0 mt-0">
+            <div>Approved By</div>
+        </div>
+    </div>
+    <button class="btn btn-primary mt-5 mb-5" onclick="pdf()">Print</button>
+</div>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+
+        /*<![CDATA[*/
+
+        const leave = /*[[${leave}]]*/ null;
+        const leaveDays = /*[[${leaveDaysInWord}]]*/ null;
+
+        /*]]>*/
+
+        function pdf() {
+            const docDefinition = {
+                pageSize: 'A5',
+                content: [
+                    {
+                        columns: [
+                            [
+                                {
+                                    image: 'data:image/png;base64,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',
+                                    width: 50,
+                                    height: 50
+                                }
+                            ],
+                            [
+                                {
+                                    text: 'কোয়ান্টাম ফাউন্ডেশন',
+                                    fontSize: 12,
+                                    bold: true,
+                                    alignment: 'center'
+                                },
+                                {
+                                    style: 'en',
+                                    text: `${leave.applicant.departmentName}, ${leave.applicant.branchName}`,
+                                    alignment: 'center'
+                                },
+                                {
+                                    text: 'ছুটির আবেদনপত্র',
+                                    alignment: 'center'
+                                }
+                            ],
+                            [
+
+                            ]
+                        ]
+                    },
+                    {
+                        text: [
+                            {
+                                text: '\n\nতারিখ: '
+                            },
+                            {
+                                text: `${leave.applyDate}`,
+                                decoration: 'underline',
+                                bold: 'true'
+                            },
+                            {
+                                text: '\nবরাবর\nএইচ.আর.ও\nকোয়ান্টাম ফাউন্ডেশন\nশান্তিনগর, ঢাকা- ১২১৭\n'
+                            }
+                        ]
+                    },
+                    {
+                        text: [
+                            {
+                                text: 'বিষয়: '
+                            },
+                            {
+                                style: 'en',
+                                text: `${leave.leaveDays} (${leaveDays}) `,
+                                decoration: 'underline',
+                                bold: 'true'
+                            },
+                            {
+                                text: ' দিন ছুটির আবেদন।\n\n'
+                            }
+                        ]
+                    },
+                    {
+                        columns: [
+                            {
+                                text: [
+                                    {
+                                        text: 'নাম: '
+                                    },
+                                    {
+                                        style: 'en',
+                                        text: `${leave.applicant.nameEn}`,
+                                        decoration: 'underline',
+                                        bold: 'true'
+                                    }
+                                ]
+                            },
+                            {
+                                text: [
+                                    {
+                                        text: `পদবি: `,
+                                        alignment: 'right'
+                                    },
+                                    {
+                                        style: 'en',
+                                        text: `${leave.applicant.designationName}\n\n`,
+                                        alignment: 'right',
+                                        decoration: 'underline',
+                                        bold: 'true'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        columns: [
+                            {
+                                text: [
+                                    {
+                                        text: `অর্গান/সেল: `
+                                    },
+                                    {
+                                        style: 'en',
+                                        text: `${leave.applicant.departmentName}`,
+                                        decoration: 'underline',
+                                        bold: 'true'
+                                    }
+                                ]
+                            },
+                            {
+                                text: [
+                                    {
+                                        text: `মোবাইল: `,
+                                        alignment: 'right'
+                                    },
+                                    {
+                                        style: 'en',
+                                        text: `${leave.applicant.primaryPhone}\n\n`,
+                                        alignment: 'right',
+                                        decoration: 'underline',
+                                        bold: 'true'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        text: [
+                            {
+                                text: `ছুটির কারণ: `
+                            },
+                            {
+                                text: `${leave.leaveReason}\n\n`,
+                                decoration: 'underline',
+                                bold: 'true'
+                            }
+                        ]
+                    },
+                    {
+                        alignment: 'justify',
+                        text: [
+                            {
+                                text: 'উপরোক্ত কারণে আমাকে '
+                            },
+                            {
+                                style: 'en',
+                                text: `${leave.leaveFrom} `,
+                                decoration: 'underline',
+                                bold: 'true'
+                            },
+                            {
+                                text: 'হতে '
+                            },
+                            {
+                                style: 'en',
+                                text: `${leave.leaveTo}`,
+                                decoration: 'underline',
+                                bold: 'true'
+                            },
+                            {
+                                text: ' তারিখ পর্যন্ত ছুটি প্রদান করলে কৃতজ্ঞ থাকব এবং যথাসময়ে কর্মস্থলে রিপোর্ট করতে না পারলে কর্তৃপক্ষের যে-কোন সিদ্ধান্ত মেনে নেব। আমার ছুটিকালীন আমার দায়িত্ব পালন করবেন '
+                            },
+                            {
+                                style: 'en',
+                                text: ` ${leave.alternateContactName}`,
+                                decoration: 'underline',
+                                bold: 'true'
+                            },
+                            {
+                                text: '। জরুরি প্রয়োজনে আমাকে ফোনে পাওয়া না গেলে যার সাথে যোগাযোগ করা যাবে - মোবাইল: '
+                            },
+                            {
+                                text: `${leave.alternateContactPhone}\n\n`,
+                                decoration: 'underline',
+                                bold: 'true'
+                            }
+                        ]
+                    },
+                    {
+                        columns: [
+                            {
+                                text: [
+                                    {
+                                        text: `নাম: `
+                                    },
+                                    {
+                                        style: 'en',
+                                        text: `${leave.alternateContactName}`,
+                                        decoration: 'underline',
+                                        bold: 'true'
+                                    }
+                                ]
+                            },
+                            {
+                                text: [
+                                    {
+                                        text: `সম্পর্ক: `,
+                                        alignment: 'right'
+                                    },
+                                    {
+                                        style: 'en',
+                                        text: `${leave.relationWith}\n\n`,
+                                        alignment: 'right',
+                                        decoration: 'underline',
+                                        bold: 'true'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        text: 'নিবেদক\n\n'
+                    },
+                    {
+                        style: 'en',
+                        columns: [
+                            [
+                                {
+                                    text: `${leave.applicant.nameEn}`,
+                                    alignment: 'center'
+                                },
+                                {
+                                    text: 'Applicant',
+                                    alignment: 'center'
+                                }
+                            ],
+                            [
+                                {
+                                    text: `${leave.authorizedByName}`,
+                                    alignment: 'center'
+                                },
+                                {
+                                    text: 'Authorized By',
+                                    alignment: 'center'
+                                }
+                            ],
+                            [
+                                {
+                                    text: 'Maisha Tabassum',
+                                    alignment: 'center'
+                                },
+                                {
+                                    text: 'Approved By',
+                                    alignment: 'center'
+                                }
+                            ]
+                        ]
+                    }
+                ],
+                defaultStyle: {
+                    font: window.env.fonts.bn,
+                    fontSize: 11
+                },
+                styles: {
+                    en: {
+                        font: window.env.fonts.en,
+                        fontSize: 11
+                    }
+                }
+            };
+            pdfMake.createPdf(docDefinition).open();
+        }
+    </script>
+</th:block>
+</body>
+</html>

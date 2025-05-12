@@ -1,0 +1,47 @@
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/report}">
+<head>
+    <title>Attendance Summary</title>
+    <style>
+        .container{
+            max-width: 1600px;
+            padding-left: 0rem !important;
+        }
+    </style>
+</head>
+<body>
+<div id="content" layout:fragment="content">
+    <div th:if="${reportData.result.dto != null && #lists.size(reportData.result.dto) > 0}">
+        <table style="width:100%">
+            <thead>
+            <tr>
+                <th>SL</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Designation</th>
+                <th>Joining Date</th>
+                <th th:each="item : ${reportData.result.typeColumns}" th:text="${item.value}"> </th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block  th:each="item : ${reportData.result.dto}">
+                <tr>
+                    <td th:text="${itemStat.count}"></td>
+                    <td th:text="${item.employeeId}"></td>
+                    <td th:text="${item.employeeName}"></td>
+                    <td th:text="${item.empDesignationStr}"></td>
+                    <td th:text="${item.joinDate}"></td>
+                    <th th:each="total : ${item.totalAttendance}" th:text="${total}"> </th>
+                    <td th:text="${item.total}"></td>
+                </tr>
+            </th:block>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="report/report-header :: notfound"></div>
+</div>
+</body>
+</html>

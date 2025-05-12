@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>Id Card Process Form</title>
+  <script type="text/javascript" th:src="@{/resources/js/papaparse.min.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/js/pdfmake.min.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/js/vfs_fonts.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/js/pdf-utils.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/js/report.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/vfs/noto-sans-english.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/vfs/noto-sans-bengali.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="#{id.card.form.ordered.list}">Create New</h4>
+<div class="container" id="content" layout:fragment="content">
+  <form method="post" th:object="${criteria}" th:action="${actionUrl}">
+    <div class="row mb-1">
+      <table class="table table-striped">
+        <thead>
+        <tr class="table-secondary">
+          <th><input class="form-check-input" type="checkbox" id="checkAll" onclick="checkAllCards()"></th>
+          <th>SL</th>
+          <th>Employee</th>
+          <th>Employee ID</th>
+          <th>Branch</th>
+          <th>Department</th>
+          <th>Designation</th>
+          <th>Blood Group</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${dataList}" th:id="|row_${itemStat.index}|" style="font-size: smaller">
+          <td>
+            <input class="form-check-input single-check" type="checkbox" th:field="*{orderList[__${itemStat.index}__].cardSelected}" th:data-rowid="${item.id}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].id}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].createdBy}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].updatedBy}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].employee}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].branchId}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].departmentId}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].designationId}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].employeeId}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].employeeName}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].branchName}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].departmentName}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].designation}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].bloodGroup}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].encriptedId}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].orderedBy}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].processedBy}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].acceptedBy}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].orderedOn}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].processedOn}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].acceptedOn}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].expireOn}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].year}">
+            <input type="hidden" th:field="*{orderList[__${itemStat.index}__].imagePath}">
+          </td>
+          <td th:text="${itemStat.count}"></td>
+          <td><a th:href="${employeeProfileUrl + item.employee}" target="_blank" th:text="${item.employeeName}"></a></td>
+          <td th:text="${item.employeeId}"></td>
+          <td th:text="${item.branchName}"></td>
+          <td th:text="${item.departmentName}"></td>
+          <td th:text="${item.designation}"></td>
+          <td th:text="${item.bloodGroup}"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="btn-section">
+      <button th:if="${hasProcessPermission}" class="btn btn-primary" type="submit" name="action" value="process">Process</button>
+      <button class="btn btn-secondary float-end" type="button" onclick="exportPdf()">Export PDF</button>
+    </div>
+  </form>
+</div>
+<th:block layout:fragment="script">
+  <script th:inline="javascript">
+    const checkEls = document.querySelectorAll('.single-check')
+    function checkAllCards() {
+      const checkAllEl = document.querySelector('#checkAll')
+      checkEls.forEach(el => {
+        el.checked = checkAllEl.checked
+      })
+    }
+
+    function exportPdf() {
+      const ids = []
+      checkEls.forEach(el => {
+        if (el.checked) ids.push(el.dataset.rowid)
+      })
+      const url = '/id-cards-by-ids?ids=' + ids
+      fetch(url).then(response => response.json()).then(data => {
+        exportIdCardsDataAsPdf(data)
+      })
+    }
+  </script>
+</th:block>
+</body>
+</html>

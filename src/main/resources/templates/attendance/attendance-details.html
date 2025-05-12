@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="|Attendance Details|"></title>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="#{employee.profile.title}">Profile</h4>
+<div class="container" id="content" layout:fragment="content">
+    <input type="hidden" id="employeeId" th:value="${employee.id}">
+    <div class="row mb-2">
+        <div class="col-md-3 text-start">
+            <img th:id="formImageOld" th:src="@{#}" th:if="${employee.imagePath}" alt="available" style="width: 45mm; height: 55mm"/>
+            <img th:id="formImageMale"th:src="@{/resources/img/dummy_male.jpg}" class="img-thumbnail" th:if="${employee.gender eq 'Male' && employee.imagePath eq null}" style="width: 45mm; height: 55mm"/>
+            <img th:id="formImageFemale" th:src="@{/resources/img/dummy_female.jpg}" class="img-thumbnail" th:if="${employee.gender eq 'Female' && employee.imagePath eq null}" style="width: 45mm; height: 55mm"/>
+        </div>
+        <div class="col-md-9 text-start">
+            <div class="row mb-1">
+                <select name="yearWiseYr" id="yearWiseYr" class="form-select" th:onchange="|changeDetails(${employee.id}, this.value)|">
+                    <option th:each="yr : ${yrList}" th:value="${yr.id}" th:text="${yr.duration}" th:attrappend="selected=${yrId ne null and yrId gt 0 and yr.id eq yrId ? 'selected': ''}"></option>
+                </select>
+            </div>
+            <div class="row mb-1">
+                <div class="fw-bolder" th:text="|${employee.nameEn + ' (' + employee.nameBn + ')'}|"></div>
+            </div>
+            <div class="row mb-1">
+                <div class="fw-bolder" th:text="${employee.designationName}"></div>
+            </div>
+            <div class="row mb-1">
+                <div class="fw-bold" th:text="${employee.status}"></div>
+            </div>
+            <div class="row mb-1">
+                <div class="fw-bold" th:text="${employee.wpd}"></div>
+            </div>
+            <div class="row mb-1">
+                <div class="fw-bold" th:text="|${#temporals.format(employee.hiring, 'dd/MM/yyyy') + ' (Joining), '}${#temporals.format(employee.regularDate, 'dd/MM/yyyy') + ' (Regular)'}|"></div>
+            </div>
+            <div class="row mb-1">
+                <div class="fw-bold" th:text="${jobDuration}"></div>
+            </div>
+            <div class="row mb-1">
+                <div class="fw-bold" th:text="|${employee.departmentName + (employee.departmentName != null and employee.departmentName != '' ? ', ' : '') + employee.branchName}|"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col">
+            <h5 class="header" th:text="|Attendance Summary (${duration})|"></h5>
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th rowspan="2">Month Name</th>
+                    <th rowspan="2">Present</th>
+                    <th rowspan="2">Absent</th>
+                    <th rowspan="2">OD/OTP/T</th>
+                    <th colspan="5">Leave</th>
+                    <th rowspan="2">Total</th>
+                </tr>
+                <tr>
+                    <th>WPD</th>
+                    <th>CL</th>
+                    <th>YR</th>
+                    <th>LWP</th>
+                    <th>Other</th>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="item : ${summaryList}">
+                    <tr th:if="${!itemStat.last}">
+                        <td class="text-start" th:text="${item.monthName}"></td>
+                        <td th:text="${item.present}"></td>
+                        <td th:text="${item.absent}"></td>
+                        <td th:text="${item.odOtpTraining}"></td>
+                        <td th:text="${item.wpd}"></td>
+                        <td th:text="${item.cl}"></td>
+                        <td th:text="${item.yr}"></td>
+                        <td th:text="${item.lwp}"></td>
+                        <td th:text="${item.otherLeave}"></td>
+                        <td th:text="${item.total}"></td>
+                    </tr>
+                    <tr th:unless="${!itemStat.last}">
+                        <th th:text="${item.monthName}"></th>
+                        <th>
+                            <a th:href="${detailsListUrl+'&duration=' + duration + '&types=1'}" target="_blank" th:text="${item.present}"></a>
+                        </th>
+                        <th>
+                            <a th:href="${detailsListUrl+'&duration=' + duration + '&types=19'}" target="_blank" th:text="${item.absent}"></a>
+                        </th>
+                        <th>
+                            <a th:href="${detailsListUrl+'&duration=' + duration + '&types=' + odOtpTrainingStr}" target="_blank" th:text="${item.odOtpTraining}"></a>
+                        </th>
+                        <th>
+                            <a th:href="${detailsListUrl+'&duration=' + duration + '&types=3'}" target="_blank" th:text="${item.wpd}"></a>
+                        </th>
+                        <th>
+                            <a th:href="${detailsListUrl+'&duration=' + duration + '&types=5'}" target="_blank" th:text="${item.cl}"></a>
+                        </th>
+                        <th>
+                            <a th:href="${detailsListUrl+'&duration=' + duration + '&types=7'}" target="_blank" th:text="${item.yr}"></a>
+                        </th>
+                        <th>
+                            <a th:href="${detailsListUrl+'&duration=' + duration + '&types=17'}" target="_blank" th:text="${item.lwp}"></a>
+                        </th>
+                        <th>
+                            <a th:href="${detailsListUrl+'&duration=' + duration + '&types=' + otherLeaveStr}" target="_blank" th:text="${item.otherLeave}"></a>
+                        </th>
+                        <th>
+                            <a th:href="${detailsListUrl+'&duration=' + duration}" target="_blank" th:text="${item.total}"></a>
+                        </th>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${hasCl}">
+        <div class="col">
+            <h5 class="header" th:text="|CL Summary|"></h5>
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th>For This Period</th>
+                    <th>Total Matured CL</th>
+                    <th>Total Taken CL</th>
+                    <th>Balance (Remaining)</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="${totalCl}"></td>
+                        <td th:text="${totalMaturedCl}"></td>
+                        <td>
+                            <a th:href="${detailsListUrl+'&duration=' + duration + '&types=5'}" target="_blank" th:text="${totalConsumedCl}"></a>
+                        </td>
+                        <td th:text="${totalBalancedCl}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${employee.regularDate != null and employee.status eq 'Regular'}">
+        <div class="col">
+            <div class="row row-cols-2">
+                <div class="col-5 offset-7 text-end manage-encash-button d-block">
+                    <a class="link-primary" href="#encashTable" onclick="addEncashRow()" th:if="${hasYrEncashEntryAccess and totalBalancedYr gt 30}">
+                        Yr Encash
+                    </a>
+                </div>
+            </div>
+            <div id="encashTable"></div>
+            <br />
+            <h5 class="header" th:text="|YR Summary|"></h5>
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th>Total Matured YR</th>
+                    <th>Total Taken (Day)</th>
+                    <th>Total Encash (Day)</th>
+                    <th>Balance (Remaining)</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="${totalYrString}"></td>
+                        <td>
+                            <a th:href="${detailsListUrl + '&types=7'}" target="_blank" th:text="${totalConsumedYr}"></a>
+                        </td>
+                        <td>
+                            <a th:href="${encashListUrl}" target="_blank" th:text="${totalYrEncashDays}"></a>
+                        </td>
+                        <td th:text="${totalBalancedYr}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${maternityLeave gt 0}">
+        <div class="col">
+            <h5 class="header" th:text="|Maternity Leave|"></h5>
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th>Consumed Maternity Leave</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="${totalYrString}">
+                            <a th:href="${detailsListUrl}" target="_blank" th:text="${maternityLeave}"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const encashPostOrPutUrl = /*[[${T(bd.org.quantum.hrm.common.Routes).ADD_YR_ENCASH}]]*/ "/add-yr-encash"
+        function postEncash() {
+            const yrEncash = {
+                employee: {id: document.getElementById('employeeId').value},
+                encashedOn: document.getElementById('encashedOn').value,
+                days: document.getElementById('days').value,
+                remarks: document.getElementById('remarks').value,
+            }
+
+            postTextApi(encashPostOrPutUrl, yrEncash)
+                .then(result => JSON.parse(result))
+                .then(data => {
+                    if (data.status === 'Success') {
+                        window.location.reload()
+                    }
+                })
+        }
+
+        function addEncashRow() {
+            const manageBtn = document.querySelector('.manage-encash-button')
+            manageBtn.classList.remove('d-block')
+            manageBtn.classList.add('d-none')
+
+            const encashDiv = document.getElementById('encashTable')
+
+            const encashHeader = document.createElement('h5')
+            encashHeader.innerText = 'Create Encash'
+            encashDiv.appendChild(encashHeader)
+
+            const newTable = document.createElement('table')
+            newTable.className = 'table-bordered table-hover text-center w-100'
+            newTable.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th scope="col" class="col-2">Date</th>
+                            <th scope="col" class="col-2">Days</th>
+                            <th scope="col" class="col-6">Remarks</th>
+                            <th scope="col" class="col-2">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <input type="text" placeholder="DD/MM/YYYY" id="encashedOn" class="form-control">
+                            </td>
+                            <td>
+                                <input type="text" id="days" class="form-control" value="30">
+                            </td>
+                            <td>
+                                <input type="text" id="remarks" class="form-control">
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    <a class="link-primary" href="#encashTable" onclick="postEncash()">
+                                        <i class="bi bi-save-fill"></i>
+                                    </a>
+                                    <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                    <a class="link-primary" href="#encashTable" onclick="restoreEncash()">
+                                        <i class="bi bi-x-circle"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+            `
+
+            encashDiv.appendChild(newTable)
+
+            const dateFrom = document.querySelector('#encashedOn')
+            setTimeout(applyDatepicker, 100, dateFrom, dateFrom.value)
+        }
+
+        function restoreEncash() {
+            const encashDiv = document.getElementById(`encashTable`)
+            const header = encashDiv.querySelector('h5')
+            encashDiv.removeChild(header)
+
+            const table = encashDiv.querySelector('table')
+            encashDiv.removeChild(table)
+
+            const manageBtn = document.querySelector('.manage-encash-button')
+            manageBtn.classList.remove('d-none')
+            manageBtn.classList.add('d-block')
+        }
+
+        function changeDetails(empId, yrClId) {
+            const detailsUrl = /*[[${detailsUrl}]]*/ ''
+            window.location.href = detailsUrl + empId + '&yrId=' + yrClId
+        }
+
+        (() => {
+            const getImageUrl = '/employee/image/download'
+            const path = /*[[${employee.imagePath}]]*/ ''
+
+            if (path) {
+                fetch(generateRequestURL(getImageUrl, {path: path}))
+                    .then(response => response.json())
+                    .then(image => {
+                        document.getElementById('formImageOld').src = image.data
+                    })
+            }
+        })()
+    </script>
+</div>
+</body>
+</html>

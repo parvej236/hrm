@@ -1,0 +1,255 @@
+<!--
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <form method="post" th:fragment="modals" th:action="${actionUrl}">
+
+        <th:block th:object="${statusForm}" xmlns:th="http://www.thymeleaf.org" th:if="${actionFor eq 'status'}">
+            <div class="row mb-2">
+                <input th:type="hidden" th:field="*{id}">
+                <input th:type="hidden" th:field="*{employee.id}">
+                <label class="col-sm-2 col-form-label" for="dateFrom">Date</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="dateFrom" placeholder="DD/MM/YYYY" th:field="*{dateFrom}" required>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-2 col-form-label pt-0" for="statusFrom">Status</label>
+                <div class="col-sm-10">
+                    <div class="form-group">
+                        <span class="input-group-text">From </span>
+                        <select th:field="*{statusFrom}" id="statusFrom" class="form-select">
+                            <option value="0"></option>
+                            <option th:each="status: ${empStatusMap}" th:value="${status.key}" th:text="${status.value}"></option>
+                        </select>
+                        <span class="input-group-text"> To </span>
+                        <select th:field="*{statusTo}" id="statusTo" class="form-select">
+                            <option value="0"></option>
+                            <option th:each="status: ${empStatusMap}" th:value="${status.key}" th:text="${status.value}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-2 col-form-label pt-0" for="remarks">Remarks</label>
+                <div class="col-sm-10">
+                    <textarea th:field="*{comments}" id="remarks" rows="1" class="form-control"></textarea>
+                </div>
+            </div>
+        </th:block>
+
+        <th:block th:object="${promotionForm}" xmlns:th="http://www.thymeleaf.org" th:if="${actionFor eq 'promotion'}">
+            <div class="row mb-2">
+                <input th:type="hidden" th:field="*{id}">
+                <input th:type="hidden" th:field="*{employee.id}">
+                <label class="col-sm-2 col-form-label" for="dateFrom">Date</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="dateFrom" placeholder="DD/MM/YYYY" th:field="*{dateFrom}" required>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-sm-2 col-form-label" for="type">Type</label>
+                <div class="col-sm-10">
+                    <select th:field="*{type}" id="type" class="form-select">
+                        <option value="PROMOTION">Promotion</option>
+                        <option value="CONVERT">Convert</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-2 col-form-label pt-0" for="designationFrom">Designation</label>
+                <div class="col-sm-10">
+                    <div class="form-group">
+                        <span class="input-group-text">From </span>
+                        <select th:field="*{designationFrom}" id="designationFrom" class="form-select">
+                            <option value="0"></option>
+                            <option th:each="designation: ${designationMap}" th:value="${designation.value}" th:text="${designation.value}"></option>
+                        </select>
+                        <span class="input-group-text"> To </span>
+                        <select th:field="*{designationTo}" id="designationTo" class="form-select">
+                            <option value="0"></option>
+                            <option th:each="designation: ${designationMap}" th:value="${designation.value}" th:text="${designation.value}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-2 col-form-label pt-0" for="remarks">Remarks</label>
+                <div class="col-sm-10">
+                    <textarea th:field="*{comments}" id="remarks" rows="1" class="form-control"></textarea>
+                </div>
+            </div>
+        </th:block>
+
+        <th:block th:object="${transferForm}" xmlns:th="http://www.thymeleaf.org" th:if="${actionFor eq 'transfer'}">
+            <div class="row mb-2">
+                <input th:type="hidden" th:field="*{id}">
+                <input th:type="hidden" th:field="*{employee.id}">
+                <label class="col-sm-2 col-form-label" for="dateFrom">Date</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="transferDate" placeholder="DD/MM/YYYY" th:field="*{transferDate}" required>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-2 col-form-label pt-0" for="fromCBC">From</label>
+                <div class="col-sm-10">
+                    <div class="form-group">
+                        <span class="input-group-text">Center/Branch/Cell </span>
+                        <select th:field="*{branchFrom}" id="fromCBC" class="form-select">
+                            <option value="0"></option>
+                            <option th:each="branch: ${branchList}" th:value="${branch.id}" th:text="${branch.name}"></option>
+                        </select>
+                        <span class="input-group-text"> Organ/Cell </span>
+                        <select th:field="*{departmentFrom}" id="departmentFrom" class="form-select">
+                            <option value="0"></option>
+                            <option th:each="dept: ${departmentList}" th:value="${dept.id}" th:text="${dept.name}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-2 col-form-label pt-0" for="toCBC">To</label>
+                <div class="col-sm-10">
+                    <div class="form-group">
+                        <span class="input-group-text">Center/Branch/Cell </span>
+                        <select th:field="*{branchTo}" id="toCBC" class="form-select">
+                            <option value="0"></option>
+                            <option th:each="branch: ${branchList}" th:value="${branch.id}" th:text="${branch.name}"></option>
+                        </select>
+                        <span class="input-group-text"> Organ/Cell </span>
+                        <select th:field="*{departmentTo}" id="departmentTo" class="form-select">
+                            <option value="0"></option>
+                            <option th:each="dept: ${departmentList}" th:value="${dept.id}" th:text="${dept.name}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-2 col-form-label pt-0" for="remarks">Comments</label>
+                <div class="col-sm-10">
+                    <textarea th:field="*{comments}" id="remarks" rows="1" class="form-control"></textarea>
+                </div>
+            </div>
+        </th:block>
+    </form>
+</th:block>
+-->
+
+
+<th:block th:fragment="modals" xmlns:th="http://www.thymeleaf.org">
+    <!-- Status Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statusModalLabel">Add Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" th:action="${actionUrl}">
+                        <div class="row mb-2">
+                            <input th:type="hidden" name="id">
+                            <input th:type="hidden" name="employee.id">
+                            <label class="col-sm-2 col-form-label" for="dateFrom">Date</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="dateFrom" placeholder="DD/MM/YYYY" name="dateFrom" required>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label pt-0" for="statusFrom">Status</label>
+                            <div class="col-sm-10">
+                                <div class="form-group">
+                                    <span class="input-group-text">From </span>
+                                    <select name="statusFrom" id="statusFrom" class="form-select">
+                                        <option value="0"></option>
+                                        <option th:each="status: ${empStatusMap}" th:value="${status.key}" th:text="${status.value}"></option>
+                                    </select>
+                                    <span class="input-group-text"> To </span>
+                                    <select name="statusTo" id="statusTo" class="form-select">
+                                        <option value="0"></option>
+                                        <option th:each="status: ${empStatusMap}" th:value="${status.key}" th:text="${status.value}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label pt-0" for="remarks">Remarks</label>
+                            <div class="col-sm-10">
+                                <textarea name="comments" id="remarks" rows="1" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!--<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+</head>
+<body>
+<div id="content" layout:fragment="modals">
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statusModalLabel">Add Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" th:action="${actionUrl}">
+                        <div class="row mb-2">
+                            <input th:type="hidden" name="id">
+                            <input th:type="hidden" name="employee.id">
+                            <label class="col-sm-2 col-form-label" for="dateFrom">Date</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="dateFrom" placeholder="DD/MM/YYYY" name="dateFrom" required>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label pt-0" for="statusFrom">Status</label>
+                            <div class="col-sm-10">
+                                <div class="form-group">
+                                    <span class="input-group-text">From </span>
+                                    <select name="statusFrom" id="statusFrom" class="form-select">
+                                        <option value="0"></option>
+                                        <option th:each="status: ${empStatusMap}" th:value="${status.key}" th:text="${status.value}"></option>
+                                    </select>
+                                    <span class="input-group-text"> To </span>
+                                    <select name="statusTo" id="statusTo" class="form-select">
+                                        <option value="0"></option>
+                                        <option th:each="status: ${empStatusMap}" th:value="${status.key}" th:text="${status.value}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label pt-0" for="remarks">Remarks</label>
+                            <div class="col-sm-10">
+                                <textarea name="comments" id="remarks" rows="1" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+
+    </script>
+</div>
+</body>
+</html>-->

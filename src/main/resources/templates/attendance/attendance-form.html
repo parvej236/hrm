@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${isApprove} ? #{attendance.form.approve.title} : #{attendance.form.create.title}"></title>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+    <style>
+        .table-wrapper {
+            overflow: auto;
+            position: relative;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            z-index: 3;
+        }
+        tbody td:nth-child(1), thead th:nth-child(1) {
+            position: sticky;
+            left: 0;
+            background-color: #f8f9fa;
+            z-index: 2;
+        }
+        tbody td:nth-child(2), thead th:nth-child(2) {
+            position: sticky;
+            left: 5px;
+            background-color: #f8f9fa;
+            z-index: 2;
+        }
+        th, td {
+            padding: 10px;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="${isApprove} ? #{attendance.form.approve.title} : #{attendance.form.create.title}">Create New</h4>
+<div class="container" id="content" layout:fragment="content">
+    <form method="post" th:object="${criteria}" th:action="${actionUrl}">
+        <input type="hidden" th:field="*{employeeName}">
+        <input type="hidden" th:field="*{regCode}">
+        <input type="hidden" th:field="*{employeeId}">
+        <input type="hidden" th:field="*{primaryPhone}">
+        <input type="hidden" th:field="*{branch}">
+        <input type="hidden" th:field="*{withSub}">
+        <input type="hidden" th:field="*{department}">
+        <input type="hidden" th:field="*{designation}">
+        <input type="hidden" th:field="*{status}">
+        <input type="hidden" th:field="*{gender}">
+        <input type="hidden" th:field="*{startDate}">
+        <input type="hidden" th:field="*{endDate}">
+        <div class="row mb-1 table-wrapper">
+            <table class="table table-striped small">
+                <thead>
+                <tr class="table-secondary">
+                    <th th:text="${isApprove} ? 'SL' : 'Action'">Action</th>
+                    <th>Employee</th>
+                    <th style="font-size: smaller" th:each=" column : ${columnList}" th:text="${column}"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${dataList}" th:id="|row_${itemStat.index}|" style="font-size: smaller">
+                    <td>
+                        <span th:if="${isApprove}" th:text="${itemStat.count}"></span>
+                        <span th:if="${!isApprove}">
+                            <button type="button" class="btn btn-danger btn-sm bi-trash-fill me-1"
+                                    th:attr="data-index=${itemStat.index}"
+                                    onclick="deleteRow(this)"></button>
+                        </span>
+                        <input type="hidden" th:Field="*{attendanceList[__${itemStat.index}__].employee.id}">
+                    </td>
+                    <td><a th:href="${detailsUrl + item.employee.id}" target="_blank" th:text="${item.employee.nameEn}"></a></td>
+                    <td th:each="type : ${item.dateStatusList}" th:id="|statusId_${itemStat.index}_${typeStat.index}|">
+                        <th:block th:if="${type.attendanceType > 0}">
+                            <input type="hidden" th:field="*{attendanceList[__${itemStat.index}__].dateStatusList[__${typeStat.index}__].attendanceDate}">
+
+                            <span th:if="${type.status eq 0}">
+                                <select style="width: 35px; font-size: smaller" th:field="*{attendanceList[__${itemStat.index}__].dateStatusList[__${typeStat.index}__].attendanceType}">
+                                    <option th:each="l : ${item.typeMap}"
+                                            th:value="${l.key}"
+                                            th:text="${l.value}"
+                                    ></option>
+                                </select>
+                            </span>
+
+                            <span th:if="${type.status eq 1 && (hasApproveAccess or hasUpdateAccess)}">
+                                <a href="#"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#appModal"
+                                   data-bs-action="update"
+                                   th:style="${attendanceTypeMap[type.attendanceType]} eq 'SL' ? 'background-color: yellow; text-decoration: none' : 'text-decoration: none'"
+                                   th:attr="data-bs-id=${type.attendanceId}, data-bs-cl=${type.clBalance}, data-bs-yr=${type.yrBalance}"
+                                   th:text="${attendanceTypeMap[type.attendanceType]}"
+
+                                >
+                                </a>
+
+                                <span th:if="${isApprove}">
+                                    <input type="hidden" th:field="*{attendanceList[__${itemStat.index}__].dateStatusList[__${typeStat.index}__].attendanceDate}">
+                                    <input type="hidden" th:field="*{attendanceList[__${itemStat.index}__].dateStatusList[__${typeStat.index}__].status}">
+                                </span>
+                            </span>
+
+                            <span th:if="${type.status eq 2 && hasApproveAccess}" >
+                                <a href="#"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#appModal"
+                                   data-bs-action="update"
+                                   th:style="${attendanceTypeMap[type.attendanceType]} eq 'SL' ? 'background-color: yellow; text-decoration: none' : 'text-decoration: none'"
+                                   th:attr="data-bs-id=${type.attendanceId}, data-bs-cl=${type.clBalance}, data-bs-yr=${type.yrBalance}"
+                                   th:text="${attendanceTypeMap[type.attendanceType]}"
+                                >
+                                </a>
+
+                                <span th:if="${isApprove}">
+                                    <input type="hidden" th:field="*{attendanceList[__${itemStat.index}__].dateStatusList[__${typeStat.index}__].attendanceDate}">
+                                    <input type="hidden" th:field="*{attendanceList[__${itemStat.index}__].dateStatusList[__${typeStat.index}__].status}">
+                                </span>
+                            </span>
+                        </th:block>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="fixed-btn-section">
+            <button th:if="${!isApprove && enableSubmit && hasSubmitAccess}" class="btn btn-primary" type="submit" name="action" value="submit">Submit</button>
+            <button th:if="${isApprove && enableApprove && !enableApproveUpdate && hasApproveAccess}" class="btn btn-primary" type="submit" name="action" value="approve">Approve</button>
+            <span th:if="${availableSL && isApprove && enableApprove && !enableApproveUpdate && hasApproveAccess}" class="text-danger">
+                Applied for SL, please review these SL and approve.
+            </span>
+            <button th:if="${isApprove && enableApproveUpdate && hasApproveAccess}" class="btn btn-primary" type="submit" name="action" value="approve">Approve Update</button>
+            <a class="btn btn-secondary float-end" th:href="${entryUrl}">Go to New Entry</a>
+        </div>
+    </form>
+    <th:block th:replace="common/modal-form.html :: modal"/>
+    <th:block th:replace="common/toast.html :: toast"/>
+</div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        modalForm("appModal", function (action, id) {
+            const attr = {}
+            const url = /*[[${T(bd.org.quantum.hrm.common.Routes).ATTENDANCE_POPUP_FORM}]]*/ "/attendance-popup-form"
+            const updateButton = /*[[#{button.update}]]*/ 'Update'
+            if (action === 'update') {
+                const attendanceId = document.querySelector(`a[data-bs-id="${id}"]`);
+                const clBalance = attendanceId.getAttribute("data-bs-cl");
+                const yrBalance = attendanceId.getAttribute("data-bs-yr");
+
+                attr.title = 'Update Attendance'
+                attr.url = url + '?attendanceId=' + id + '&cl=' + clBalance + '&yr=' + yrBalance
+                attr.button = updateButton
+            }
+            return attr;
+        })
+
+        function deleteRow(el) {
+            document.querySelector(`#row_${el.dataset.index}`).remove();
+        }
+
+        (()=>{
+            const table = document.querySelector('.table-wrapper')
+            const width = window.screen.width * 0.7
+            const height = window.screen.height * 0.65
+            table.style.maxWidth = `${width}px`
+            table.style.maxHeight = `${height}px`
+        })()
+    </script>
+</th:block>
+</body>
+</html>

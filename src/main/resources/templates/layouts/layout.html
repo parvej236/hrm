@@ -1,0 +1,41 @@
+<!doctype html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{theme/layout-one}">
+
+<head>
+    <title>HRM</title>
+    <link rel="stylesheet" th:href="@{/resources/styles/style.css}"/>
+
+    <script  th:inline="javascript">
+        const application = /*[[${@environment.getProperty('application.name')}]]*/ 'Quantum Application'
+        const branch = /*[[${loggedInUser != null ? loggedInUser.branchName : 'unknown'}]]*/ 'Unknown'
+        const username = /*[[${loggedInUser != null ? loggedInUser.name : 'unknown'}]]*/ 'unknown'
+        window.env = {
+            application: 'Member',
+            branch: branch,
+            username: username,
+            fonts: {
+                en: 'NotoSansEnglish',
+                bn: 'NotoSansBengali'
+            }
+        }
+    </script>
+</head>
+
+<body>
+<div>
+    <div>
+        <span layout:fragment="application-name">HRM</span>
+        <th:block layout:fragment="side-menu">
+            <th:block th:replace="layouts/side-menu :: sidemenu"/>
+        </th:block>
+        <th:block layout:fragment="page-content">
+            <th:block layout:fragment="content"/>
+        </th:block>
+    </div>
+</div>
+<th:block layout:fragment="script"/>
+</body>
+
+</html>

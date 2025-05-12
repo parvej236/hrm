@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorator="~{layouts/layout}">
+<head>
+    <title>Employee Id Remaining List</title>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header">Employees Who Have No Employee Id</h4>
+<div layout:fragment="content">
+    <div  th:if="${regularIrregularWithNoId != null && #lists.size(regularIrregularWithNoId) > 0}">
+        <h3>Irregular Employee</h3>
+        <table class="table table-bordered w-100">
+            <thead class="text-center">
+            <tr>
+                <th>SL</th>
+                <th>Action</th>
+                <th>Name</th>
+                <th>Reg.&nbsp;Code</th>
+                <th>Branch</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Joining</th>
+                <th style="width: 75px">ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="emp : ${regularIrregularWithNoId}">
+                <td th:text="${empStat.count}"></td>
+                <td class="text-center">
+                    <button class="btn btn-primary" th:id="|regular_${empStat.index}|" th:text="Assign" th:onclick="|generateEmployeeId(${emp.id}, ${empStat.index})|"></button>
+                    <span th:class="|regular_${empStat.index} d-none|"><i class="bi bi-check2-square"></i></span>
+                </td>
+                <td th:text="${emp.nameEn}"></td>
+                <td th:text="${emp.regCode}"></td>
+                <td th:text="${emp.branchName}"></td>
+                <td th:text="${emp.departmentName}"></td>
+                <td th:text="${emp.designationName}"></td>
+                <td th:text="${#temporals.format(emp.hiring, 'dd/MM/yyyy')}"></td>
+                <td th:id="|rEmpId_${empStat.index}|"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div  th:if="${musterRollWithNoId != null && #lists.size(musterRollWithNoId) > 0}">
+        <h3>Muster Roll Employee</h3>
+        <table class="table table-bordered w-100">
+            <thead class="text-center">
+            <tr>
+                <th>SL</th>
+                <th>Action</th>
+                <th>Name</th>
+                <th>Reg.&nbsp;Code</th>
+                <th>Branch</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Joining</th>
+                <th style="width: 75px">ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="emp : ${musterRollWithNoId}">
+                <td th:text="${empStat.count}"></td>
+                <td class="text-center">
+                    <button class="btn btn-primary" th:id="|muster_${empStat.index}|" th:text="Assign" th:onclick="|generateEmployeeId(${emp.id}, ${empStat.index}, 'muster', 'temp')|"></button>
+                    <span th:class="|muster_${empStat.index} d-none|"><i class="bi bi-check2-square"></i></span>
+                </td>
+                <td th:text="${emp.nameEn}"></td>
+                <td th:text="${emp.regCode}"></td>
+                <td th:text="${emp.branchName}"></td>
+                <td th:text="${emp.departmentName}"></td>
+                <td th:text="${emp.designationName}"></td>
+                <td th:text="${#temporals.format(emp.hiring, 'dd/MM/yyyy')}"></td>
+                <td th:id="|musterId_${empStat.index}|"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div  th:if="${contractualWithNoId != null && #lists.size(contractualWithNoId) > 0}">
+        <h3>Contractual Employee</h3>
+        <table class="table table-bordered w-100">
+            <thead class="text-center">
+            <tr>
+                <th>SL</th>
+                <th>Action</th>
+                <th>Name</th>
+                <th>Reg.&nbsp;Code</th>
+                <th>Branch</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Joining</th>
+                <th style="width: 75px">ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="emp : ${contractualWithNoId}">
+                <td th:text="${empStat.count}"></td>
+                <td class="text-center">
+                    <button class="btn btn-primary" th:id="|contract_${empStat.index}|" th:text="Assign" th:onclick="|generateEmployeeId(${emp.id}, ${empStat.index}, 'contract', 'temp')|"></button>
+                    <span th:class="|contract_${empStat.index} d-none|"><i class="bi bi-check2-square"></i></span>
+                </td>
+                <td th:text="${emp.nameEn}"></td>
+                <td th:text="${emp.regCode}"></td>
+                <td th:text="${emp.branchName}"></td>
+                <td th:text="${emp.departmentName}"></td>
+                <td th:text="${emp.designationName}"></td>
+                <td th:text="${#temporals.format(emp.hiring, 'dd/MM/yyyy')}"></td>
+                <td th:id="|contractId_${empStat.index}|"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div  th:if="${partTimeWithNoId != null && #lists.size(partTimeWithNoId) > 0}">
+        <h3>Part-Time Employee</h3>
+        <table class="table table-bordered w-100">
+            <thead class="text-center">
+            <tr>
+                <th>SL</th>
+                <th>Action</th>
+                <th>Name</th>
+                <th>Reg.&nbsp;Code</th>
+                <th>Branch</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Joining</th>
+                <th style="width: 75px">ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="emp : ${partTimeWithNoId}">
+                <td th:text="${empStat.count}"></td>
+                <td class="text-center">
+                    <button class="btn btn-primary" th:id="|pTime_${empStat.index}|" th:text="Assign" th:onclick="|generateEmployeeId(${emp.id}, ${empStat.index}, 'pTime', 'temp')|"></button>
+                    <span th:class="|pTime_${empStat.index} d-none|"><i class="bi bi-check2-square"></i></span>
+                </td>
+                <td th:text="${emp.nameEn}"></td>
+                <td th:text="${emp.regCode}"></td>
+                <td th:text="${emp.branchName}"></td>
+                <td th:text="${emp.departmentName}"></td>
+                <td th:text="${emp.designationName}"></td>
+                <td th:text="${#temporals.format(emp.hiring, 'dd/MM/yyyy')}"></td>
+                <td th:id="|pTimeId_${empStat.index}|"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div  th:if="${internWithNoId != null && #lists.size(internWithNoId) > 0}">
+        <h3>Intern Employee</h3>
+        <table class="table table-bordered w-100">
+            <thead class="text-center">
+            <tr>
+                <th>SL</th>
+                <th>Action</th>
+                <th>Name</th>
+                <th>Reg.&nbsp;Code</th>
+                <th>Branch</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Joining</th>
+                <th style="width: 75px">ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="emp : ${internWithNoId}">
+                <td th:text="${empStat.count}"></td>
+                <td class="text-center">
+                    <button class="btn btn-primary" th:id="|intern_${empStat.index}|" th:text="Assign" th:onclick="|generateEmployeeId(${emp.id}, ${empStat.index}, 'intern', 'temp')|"></button>
+                    <span th:class="|intern_${empStat.index} d-none|"><i class="bi bi-check2-square"></i></span>
+                </td>
+                <td th:text="${emp.nameEn}"></td>
+                <td th:text="${emp.regCode}"></td>
+                <td th:text="${emp.branchName}"></td>
+                <td th:text="${emp.departmentName}"></td>
+                <td th:text="${emp.designationName}"></td>
+                <td th:text="${#temporals.format(emp.hiring, 'dd/MM/yyyy')}"></td>
+                <td th:id="|internId_${empStat.index}|"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div  th:if="${probationaryWithNoId != null && #lists.size(probationaryWithNoId) > 0}">
+        <h3>Probationary Employee</h3>
+        <table class="table table-bordered w-100">
+            <thead class="text-center">
+            <tr>
+                <th>SL</th>
+                <th>Action</th>
+                <th>Name</th>
+                <th>Reg.&nbsp;Code</th>
+                <th>Branch</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Joining</th>
+                <th style="width: 75px">ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="emp : ${probationaryWithNoId}">
+                <td th:text="${empStat.count}"></td>
+                <td class="text-center">
+                    <button class="btn btn-primary" th:id="|probationary_${empStat.index}|" th:text="Assign" th:onclick="|generateEmployeeId(${emp.id}, ${empStat.index}, 'probationary', 'temp')|"></button>
+                    <span th:class="|probationary_${empStat.index} d-none|"><i class="bi bi-check2-square"></i></span>
+                </td>
+                <td th:text="${emp.nameEn}"></td>
+                <td th:text="${emp.regCode}"></td>
+                <td th:text="${emp.branchName}"></td>
+                <td th:text="${emp.departmentName}"></td>
+                <td th:text="${emp.designationName}"></td>
+                <td th:text="${#temporals.format(emp.hiring, 'dd/MM/yyyy')}"></td>
+                <td th:id="|probationaryId_${empStat.index}|"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <th:block th:replace="common/toast.html :: toast"/>
+</div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        function generateEmployeeId(id, elIndex, status, type='regular') {
+            const url = /*[[${T(bd.org.quantum.hrm.common.Routes).GENERATE_EMPLOYEE_ID}]]*/ '/generate-employee-id'
+            const btnEL = type === 'regular' ? document.getElementById(`regular_${elIndex}`) : document.getElementById(`${status}_${elIndex}`)
+            const okBtn = type === 'regular' ? document.querySelector(`.regular_${elIndex}`) : document.querySelector(`.${status}_${elIndex}`)
+
+            const uri = url + `?id=${id}&type=${type}`
+            getApi(uri).then(data => {
+                if (type==='regular') {
+                    document.getElementById(`rEmpId_${elIndex}`).innerText = data.empId
+                } else {
+                    document.getElementById(`${status}Id_${elIndex}`).innerText = data.empId
+                }
+
+                btnEL.classList.add('d-none')
+                okBtn.classList.remove('d-none')
+                okBtn.classList.add('d-block')
+            })
+        }
+    </script>
+</th:block>
+</body>
+</html>

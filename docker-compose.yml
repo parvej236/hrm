@@ -1,0 +1,37 @@
+services:
+   hrm:
+      container_name: hrm
+      build:
+         context: ~/projects/microservices/hrm
+         dockerfile: Dockerfile
+         args:
+            JAR_FILE: hrm.jar
+      image: quantum/hrm:${VERSION:-latest}
+      volumes:
+         - /file:/file
+      ports:
+         - 8112:8112
+         - 8512:8512
+      networks:
+         - servicenet
+      extra_hosts:
+         - auth.qict.org:${HOST_IP}
+         - user.qict.org:${HOST_IP}
+         - hrm.qict.org:${HOST_IP}
+         - postgres.qict.org:${HOST_IP}
+      environment:
+         - TZ=Asia/Dhaka
+         - DB_URL=${DB_URL}
+         - DB_USER=${DB_USER}
+         - DB_PASS=${DB_PASS}
+         - DOMAIN_NAME=${DOMAIN_NAME}
+         - AUTH_URL=${AUTH_URL}
+         - USER_URL=${USER_URL}
+         - RESOURCE_API_URL=${RESOURCE_API_URL}
+         - MEMBER_URL=${MEMBER_URL}
+         - MEMBER_API_URL=${MEMBER_API_URL}
+         - ZKT_SERVER_URL=${ZKT_SERVER_URL}
+         - ZKT_SERVER_TOKEN=${ZKT_SERVER_TOKEN}
+
+networks:
+   servicenet: null

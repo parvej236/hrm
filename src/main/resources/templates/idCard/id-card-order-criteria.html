@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="#{id.card.criteria.form.title}">m</title>
+  <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="#{id.card.criteria.form.title}">Create New</h4>
+<div class="container" id="content" layout:fragment="content">
+  <form th:object="${criteria}" method="post">
+    <div class="row mb-1">
+      <label for="employeeName" class="col-form-label col-3">Name</label>
+      <div class="col-6">
+        <input type="text" id="employeeName" placeholder="Employee's Name" class="form-control" th:field="*{employeeName}">
+      </div>
+    </div>
+    <div class="row mb-1">
+      <label for="regCode" class="col-form-label col-3">Registration Code</label>
+      <div class="col-6">
+        <input type="text" id="regCode" placeholder="Employee's Registration Code" class="form-control" th:field="*{regCode}">
+      </div>
+    </div>
+    <div class="row mb-1">
+      <label for="employeeId" class="col-form-label col-3">Employee ID</label>
+      <div class="col-6">
+        <input type="text" id="employeeId" placeholder="Employee's Id" class="form-control" th:field="*{employeeId}">
+      </div>
+    </div>
+    <div class="row mb-1">
+      <label for="primaryPhone" class="col-form-label col-3">Mobile</label>
+      <div class="col-6">
+        <input type="text" id="primaryPhone" placeholder="Employee's Primary Phone" class="form-control" th:field="*{primaryPhone}">
+      </div>
+    </div>
+    <div class="row mb-1">
+      <label for="branch" class="col-form-label col-3">Branch</label>
+      <div class="col-6">
+        <select id="branch" th:field="*{branch}" class="form-select" onchange="loadDepartment()">
+          <option value="0">Select Branch</option>
+          <option th:each="branch : ${branchList}" th:value="${branch.id}" th:text="${branch.name}"></option>
+        </select>
+      </div>
+      <div class="form-check col-3">
+        <input class="form-check-input" type="checkbox" value="true" id="withSubBranch" name="withSub">
+        <label class="form-check-label" for="withSubBranch">
+          With Subsidiary
+        </label>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <label for="department" class="col-form-label col-3">Department</label>
+      <div class="col-6">
+        <select id="department" th:field="*{department}" class="form-select">
+          <option value="0">Select Department</option>
+        </select>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <label for="designation" class="col-form-label col-3">Designation</label>
+      <div class="col-6">
+        <div class="input-group">
+        <select th:field="*{designation}" id="designation" class="form-select">
+          <option value="0">Select Designation</option>
+          <option th:each="designation : ${designationMap}" th:value="${designation.key}" th:text="${designation.value}"></option>
+        </select>
+          <input id="designationSearch" class="form-control" type="text" oninput="searchDesignation(event)" placeholder="type to search designation">
+          <div id="designationSearchResults" class="dropdown-menu" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <label for="designation" class="col-form-label col-3">Status</label>
+      <div class="col-6">
+        <select th:field="*{status}" id="status" class="form-select">
+          <option value="">Select Status</option>
+          <option th:each="status : ${empStatusMap}" th:value="${status.key}" th:text="${status.value}"></option>
+        </select>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <label for="designation" class="col-form-label col-3">Type</label>
+      <div class="col-6">
+        <div class="form-check form-check-inline">
+          <input type="radio" class="form-check-input" id="order" value="order" name="orderType" checked>
+          <label for="order" class="form-check-label">Order</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input type="radio" class="form-check-input" id="reOrder" value="reOrder" name="orderType">
+          <label for="reOrder" class="form-check-label">Re-Order</label>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <label for="designation" class="col-form-label col-3">Year</label>
+      <div class="col-6">
+        <input type="text" class="form-control-plaintext" id="year" th:field="*{year}">
+      </div>
+    </div>
+    <div class="row mb-1">
+      <label for="maleGender" class="col-form-label col-3">Gender</label>
+      <div class="col-6">
+        <div class="form-check form-check-inline">
+          <input type="radio" class="form-check-input" id="maleGender" value="Male" name="gender">
+          <label for="maleGender" class="form-check-label">Male</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input type="radio" class="form-check-input" id="femaleGender" value="Female" name="gender">
+          <label for="femaleGender" class="form-check-label">Female</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input type="radio" class="form-check-input" id="bothGender" value="all" name="gender" checked>
+          <label for="bothGender" class="form-check-label">All</label>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <div class="fixed-btn-section">
+        <button style="width: 100px" type="submit" class="btn btn-primary ms-2 btn-value">Search</button>
+      </div>
+    </div>
+  </form>
+
+  <script th:inline="javascript">
+    const designationMap = /*[[${designationMap}]]*/ null
+
+    function loadDepartment() {
+      const branchId = document.getElementById('branch').value
+      const url = `/department-list/${branchId}`
+      const deptIdElement = document.getElementById('department')
+
+      const options = []
+      options.push(`<option value='0'>Select Department</option>`)
+
+      if (branchId !== undefined && branchId !== '0') {
+        fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                  data.map(dept => options.push(`<option value='${dept.id}'>${dept.name}</option>`))
+                  deptIdElement.innerHTML = options.join('')
+                })
+                .catch(error => {
+                  console.error('Error fetching department list:', error)
+                });
+      }
+    }
+
+    function searchDesignation(event) {
+      if (event.target.value.length >= 3) {
+        const searchTerm = event.target.value.toLowerCase();
+        let filteredDesignation = []
+        Object.entries(designationMap).forEach((value, key) => {
+          if (value[1].toLowerCase().includes(searchTerm)) {
+            const obj = { id: value[0], name: value[1] }
+            filteredDesignation.push(obj)
+          }
+        })
+        displaySearchResultsForDesignation(filteredDesignation);
+      }
+    }
+
+    function displaySearchResultsForDesignation(designations) {
+      const searchResults = document.getElementById('designationSearchResults')
+      searchResults.innerHTML = ''
+
+      designations.forEach(designation => {
+        const option = document.createElement('div')
+        option.classList.add('dropdown-item')
+        option.classList.add('text-primary')
+        option.textContent = `${designation.name}`
+        option.addEventListener('click', () => selectDesignation(designation))
+        searchResults.appendChild(option)
+      })
+
+      searchResults.style.display = designations.length > 0 ? 'block' : 'none'
+    }
+
+    function selectDesignation(designation) {
+      document.getElementById('designation').value = designation.id
+      document.getElementById('designationSearchResults').style.display = 'none'
+      document.getElementById('designationSearch').value = ''
+    }
+
+    loadDepartment()
+  </script>
+</div>
+</body>
+</html>

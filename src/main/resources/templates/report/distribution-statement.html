@@ -1,0 +1,40 @@
+<th:block  xmlns:th="http://www.thymeleaf.org">
+    <link rel="stylesheet" th:href="@{/resources/styles/report-style.css}"/>
+
+    <div th:replace="report/report-header :: header"></div>
+
+    <div th:if="${reportData.result.dto != null && #lists.size(reportData.result.dto) > 0}">
+        <table style="width:100%">
+            <thead>
+            <tr>
+                <th>SL</th>
+                <th>Bank Code</th>
+                <th>Entry Date</th>
+                <th>Donor</th>
+                <th>Phone</th>
+                <th>Referred By</th>
+                <th>Distribution Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block  th:each="item : ${reportData.result.dto}">
+                <tr>
+                    <td th:text="${itemStat.count}"></td>
+                    <td th:text="${item.bankCode}"></td>
+                    <th:block th:with="dateArray = ${#strings.arraySplit(item.created,' ')[0].split('-')}">
+                        <td th:text="${dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0]}"></td>
+                    </th:block>
+                    <td th:text="${item.donorName}"></td>
+                    <td th:text="${item.donorPhone}"></td>
+                    <td th:text="${item.refByName}"></td>
+                    <th:block th:with="dateArray = ${#strings.arraySplit(item.distributionDate,' ')[0].split('-')}">
+                        <td th:text="${dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0]}"></td>
+                    </th:block>
+                </tr>
+            </th:block>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="report/report-header :: notfound"></div>
+</th:block>

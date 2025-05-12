@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <title>Leave List</title>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header">Leave List</h4>
+<th:block layout:fragment="content">
+    <table id='table' th:attr="data-url=${searchUrl}">
+        <thead>
+        <tr>
+            <th class="col-md-1" data-column-name='action'>Action</th>
+            <th class="col-md-3" data-column-name='applicant.nameEn'>Applied By</th>
+            <th class="col-md-1" data-column-name='applicant.branchName'>Branch</th>
+            <th class="col-md-2" data-column-name='applicant.departmentName'>Department</th>
+            <th class="col-md-2" data-column-name='applicant.designation.name'>Designation</th>
+            <th class="col-md-2" data-column-name='applicant.primaryPhone'>Phone</th>
+            <th class="col-md-2" data-column-name='duration'>Duration</th>
+            <th class="col-md-1" data-column-name='leaveDays'>Days</th>
+        </tr>
+        </thead>
+    </table>
+</th:block>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const table = new DataTable('#table', {
+            omniPlaceholder: "Name or reg. code or employee id",
+            // sortColumn: "applicant.nameEn",
+            filterEnabled: false,
+            formatter: {
+                action: (el, column, rowData) => {
+                    const entryUrl = /*[[${entryUrl}]]*/ '/leave-apply';
+                    el.innerHTML = `<a href="${entryUrl}?id=${rowData.id}"
+                    id="editButton" class="btn btn-secondary btn-sm" type="button">
+                    Open
+                    </a>`
+                },
+                duration:(el, column, rowData) => {
+                    el.innerText = `${rowData.leaveFrom.split(' ')[0]} - ${rowData.leaveTo.split(' ')[0]}`
+                }
+            }
+        })
+    </script>
+</th:block>
+</body>
+</html>

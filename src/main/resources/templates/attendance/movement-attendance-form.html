@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="(${movement.id > 0} ? #{movement.applied.form.title} : #{movement.apply.form.title})"></title>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+</head>
+<body>
+
+<h4 layout:fragment="content-header"
+    th:text="(${movement.id > 0} ? #{movement.applied.form.title} : #{movement.apply.form.title})"></h4>
+<div id="content" layout:fragment="content">
+    <form method="post" th:object="${movement}">
+        <div class="row" th:if="${movement.stage == null || movement.stage == 'PENDING'}">
+            <div class="col-md-2 mt-2">
+                <label for="employeeSearch">Search<span class="text-danger">*</span></label>
+            </div>
+            <div class="col-md-8">
+                <div class="input-group">
+                    <input class="form-control autocomplete employeeSearch"
+                           placeholder="Type reg / employee id to search" id="employeeSearch" autocomplete="off"
+                           data-search-url="/get-employees-by-employee-info?employeeInfo="
+                           th:required="${movement.stage eq null ? 'required' : null}">
+                    <span class="input-group-text" role="button">
+                                <i class="bi bi-search"></i></span>
+                    <span class="input-group-text rounded-end" role="button"
+                          onclick="clearEmployee()">Clear</span>
+                </div>
+                <span th:if="${#fields.hasErrors('employee.id')}" th:errorclass="error" th:errors="*{employee.id}"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <label class="col-md-2 mt-2 form-label" for="employeeName">Name</label>
+            <div class="col-md-8">
+                <input type="hidden" th:field="*{id}">
+                <input type="hidden" th:field="*{stage}">
+                <input type="hidden" th:id="employeeId" th:field="*{employee.id}">
+
+                <div class="form-control-plaintext" id="employeeName" th:text="${movement.employee.nameEn}"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <label class="col-md-2 mt-2 form-label" for="employeeDesignation">Designation</label>
+            <div class="col-md-8">
+                <div class="form-control-plaintext" id="employeeDesignation"
+                     th:text="${movement.employee.designation.name}"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <label class="col-md-2 mt-2 form-label" for="employeeC/B/C">C/B/C</label>
+            <div class="col-md-8">
+                <div class="form-control-plaintext" id="employeeC/B/C" th:text="${movement.employee.branchName}"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <label class="col-md-2 mt-2 form-label" for="employeeO/C">O/C</label>
+            <div class="col-md-8">
+                <div class="form-control-plaintext" id="employeeO/C" th:text="${movement.employee.departmentName}"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <label class="col-md-2 mt-2 form-label" for="employeePhone">Phone</label>
+            <div class="col-md-8">
+                <div class="form-control-plaintext" id="employeePhone"
+                     th:text="${movement.employee.primaryPhone}"></div>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <label class="col-md-2 mt-2">Duration<span class="text-danger">*</span></label>
+            <div class="col-md-6">
+                <div class="input-group" th:if="${movement.stage == null || movement.stage == 'PENDING'}">
+                    <input type="text" class="form-control fromDate" id="dateFrom" onclick="movementDuration()"
+                           onblur="stopInterval()" th:field="*{dateFrom}" required>
+                    <span class="input-group-text">To</span>
+                    <input type="text" class="form-control toDate" id="dateTo" onclick="movementDuration()"
+                           onblur="stopInterval()" th:field="*{dateTo}" required>
+                </div>
+
+                <div th:unless="${movement.stage == null || movement.stage == 'PENDING'}">
+                    <div class="form-control-plaintext" th:text="${movement.dateFrom + ' To ' + movement.dateTo}"></div>
+                    <input type="hidden" id="fromDate" th:field="*{dateFrom}">
+                    <input type="hidden" id="toDate" th:field="*{dateTo}">
+                </div>
+                <span th:if="${#fields.hasErrors('days')}" th:errorclass="error" th:errors="*{days}"></span>
+            </div>
+            <span class="col-md-2 mt-2" id="movementDuration"><span th:if="${movement.days != 0}">Total <span
+                    th:text="${movement.days}"></span> Day(s)</span></span>
+            <input type="hidden" id="movementDays" th:field="*{days}">
+        </div>
+
+        <div class="row">
+            <label class="col-md-2 mt-2 form-label" for="reason">Purpose<span class="text-danger">*</span></label>
+
+            <div class="col-md-8">
+                        <textarea class="form-control" id="reason"
+                                  th:if="${movement.stage == null || movement.stage == 'PENDING'}"
+                                  th:field="*{purpose}"></textarea>
+                <div th:unless="${movement.stage == null || movement.stage == 'PENDING'}">
+                    <span class="form-control-plaintext" th:text="${movement.purpose}"></span>
+                    <input type="hidden" th:field="*{purpose}">
+                </div>
+                <span th:if="${#fields.hasErrors('purpose')}" th:errorclass="error" th:errors="*{purpose}"></span>
+            </div>
+        </div>
+
+        <div class="fixed-btn-section">
+            <button class="btn btn-primary" type="submit" name="action" value="save"
+                    th:if="${movement.id == null}">Save
+            </button>
+            <button class="btn btn-primary" type="submit" name="action" value="update"
+                    th:if="${movement.id gt 0 && movement.stage == 'PENDING'}">Update
+            </button>
+            <button class="btn btn-primary" type="submit" name="action" value="submit"
+                    th:if="${movement.id gt 0 && movement.stage == 'PENDING' && hasAuthorizationPermission}">Authorize
+            </button>
+        </div>
+    </form>
+    <th:block th:replace="common/toast.html :: toast"/>
+</div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+
+        function renderEmployee(searchKey, employee) {
+            return `
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div>${employee.nameEn} - ${employee.designationName}</div>
+                    </div>
+                </div>
+            `
+        }
+
+        function selectEmployee(searchInput, employee) {
+            document.getElementById("employeeId").value = employee.id
+            document.getElementById("employeeName").innerText = employee.nameEn
+            document.getElementById("employeeDesignation").innerText = employee.designationName
+            document.getElementById("employeeC/B/C").innerText = employee.branchName
+            document.getElementById("employeeO/C").innerText = employee.departmentName
+            document.getElementById("employeePhone").innerText = employee.primaryPhone
+        }
+
+        function clearEmployee() {
+            document.getElementById("employeeId").value = ""
+            document.getElementById("employeeName").innerText = ""
+            document.getElementById("employeeDesignation").innerText = ""
+            document.getElementById("employeeC/B/C").innerText = ""
+            document.getElementById("employeeO/C").innerText = ""
+            document.getElementById("employeePhone").innerText = ""
+            document.querySelector(".employeeSearch").value = ""
+            document.querySelector(".employeeSearch").focus()
+        }
+
+        let interval;
+
+        function movementDuration() {
+            interval = setInterval(() => {
+                const start = document.querySelector("#dateTo").value;
+                const end = document.querySelector("#dateFrom").value;
+
+                if (start !== "" && end !== "") {
+                    const from = start.split("/");
+                    const to = end.split("/");
+
+                    const fromDate = new Date(`${from[2]}-${from[1]}-${from[0]}`);
+                    const toDate = new Date(`${to[2]}-${to[1]}-${to[0]}`);
+                    const movementDays = Math.abs((toDate.getTime() - fromDate.getTime()) / 86400000) + 1;
+
+                    document.querySelector("#movementDuration").innerHTML = `Total ${movementDays} Day(s)`;
+                    document.querySelector("#movementDays").value = movementDays;
+                }
+            }, 100);
+        }
+
+        function stopInterval() {
+            clearInterval(interval);
+        }
+
+        (() => {
+            const fromDate = document.querySelector("#dateFrom")
+            applyDatepicker(fromDate, fromDate.value)
+
+            const toDate = document.querySelector("#dateTo")
+            applyDatepicker(toDate, toDate.value)
+
+            const employee = document.querySelectorAll(".employeeSearch");
+            for (const el of employee) {
+                new AutoComplete(el, renderEmployee, selectEmployee)
+            }
+        })();
+    </script>
+</th:block>
+</body>
+</html>

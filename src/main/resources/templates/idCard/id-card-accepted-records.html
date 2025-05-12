@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Id Card Accepted List</title>
+    <script type="text/javascript" th:src="@{/resources/js/jszip.min.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="#{id.card.list.title}">Create New</h4>
+<div class="container" id="content" layout:fragment="content">
+    <form method="post" th:object="${criteria}" th:action="${actionUrl}">
+        <div class="row mb-1">
+            <table class="table table-striped">
+                <thead>
+                <tr class="table-secondary">
+                    <th>SL</th>
+                    <th colspan="2">Employee</th>
+                    <th>Employee ID</th>
+                    <th>Branch</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Blood Group</th>
+                    <th>QR Image</th>
+                    <th>Barcode Image</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${dataList}" th:id="|row_${itemStat.index}|" style="font-size: smaller">
+                    <td>
+                        <span th:text="${itemStat.count}"></span>
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].id}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].createdBy}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].updatedBy}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].employee}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].branchId}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].departmentId}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].designationId}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].employeeId}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].employeeName}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].branchName}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].departmentName}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].designation}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].bloodGroup}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].stage}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].encriptedId}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].orderedBy}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].processedBy}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].acceptedBy}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].orderedOn}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].processedOn}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].acceptedOn}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].expireOn}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].year}">
+                        <input type="hidden" th:field="*{orderList[__${itemStat.index}__].imagePath}">
+                    </td>
+                    <td width="81px">
+                        <img th:src="${item.base64}" alt="picture" th:high="80" th:width="80">
+                    </td>
+                    <td><a th:href="${employeeProfileUrl + item.employee}" target="_blank" th:text="${item.employeeName}"></a></td>
+                    <td th:text="${item.employeeId}"></td>
+                    <td th:text="${item.branchName}"></td>
+                    <td th:text="${item.departmentName}"></td>
+                    <td th:text="${item.designation}"></td>
+                    <td th:text="${item.bloodGroup}"></td>
+                    <td>
+                        <img class="qr-image" th:data-imagename="|${item.employeeId}|" th:src="'data:image/png;base64,' + ${item.qrCodeBase64}" height="70" width="70" alt="QR Code"/>
+                    </td>
+                    <td>
+                        <img class="barcode-image" th:data-imagename="|${item.employeeId}|" th:src="'data:image/png;base64,' + ${item.barcodeBase64}" height="25" width="100" alt="Barcode Image"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6 d-grid d-md-block"></div>
+            <div class="col-md-6 text-end d-grid d-md-block">
+                <button class="btn btn-secondary" type="button" onclick="generateQrImage()">Export QR</button>
+            </div>
+        </div>
+    </form>
+</div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        function generateQrImage(type = 'qr') {
+            const zip = new JSZip()
+            const imageEls = document.querySelectorAll('.qr-image')
+
+            if (imageEls.length > 0) {
+                imageEls.forEach((img, index) => {
+                    const imageName = img.getAttribute('data-imagename')
+                    const base64Data = img.src.split(',')[1]
+                    const binaryData = atob(base64Data)
+                    const arrayBuffer = new Uint8Array(binaryData.length)
+
+                    // Convert binary string to Uint8Array
+                    for (let i = 0; i < binaryData.length; i++) {
+                        arrayBuffer[i] = binaryData.charCodeAt(i)
+                    }
+
+                    zip.file(`${imageName}.png`, arrayBuffer)
+                })
+
+                // Generate and download ZIP file
+                zip.generateAsync({ type: 'blob' }).then((content) => {
+                    const link = document.createElement('a')
+                    link.href = URL.createObjectURL(content)
+                    link.download = `${type}_images.zip`
+                    link.click()
+                })
+            } else {
+                alert(`Please select at least one row to download ${type}!`)
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>

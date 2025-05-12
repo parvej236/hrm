@@ -1,0 +1,56 @@
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/report}">
+<head>
+    <title>Employee's Monthly Statement</title>
+    <style>
+        .container{
+            max-width: 1600px;
+            padding-left: 0rem !important;
+        }
+    </style>
+</head>
+<body>
+<div id="content" layout:fragment="content">
+    <div th:if="${reportData.result.data != null && #lists.size(reportData.result.data) > 0}">
+        <table style="width:100%">
+            <thead>
+            <tr>
+                <th rowspan="2">SL</th>
+                <th rowspan="2">Center/Branch/Cell</th>
+                <th rowspan="2">Staff No. in Previous Month</th>
+                <th rowspan="2">Staff No. Joined in Current Month</th>
+                <th rowspan="2">Staff No. Transferred in Current Month</th>
+                <th rowspan="2">Staff No. Resigned in Current Month</th>
+                <th colspan="4">Staff No. in Current Month</th>
+                <th rowspan="2">Remarks</th>
+            </tr>
+            <tr>
+                <th>Regular</th>
+                <th>Irregular</th>
+                <th>Others</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${reportData.result.data}">
+                <td th:text="${itemStat.count}"></td>
+                <td th:text="${item.branchName}"></td>
+                <td class="text-end pe-2" th:text="${item.prevMonthCount}"></td>
+                <td class="text-end pe-2" th:text="${item.joinedInCurMonth}"></td>
+                <td class="text-end pe-2" th:text="${item.transferedInCurMonth}"></td>
+                <td class="text-end pe-2" th:text="${item.resignedInCurMonth}"></td>
+                <td class="text-end pe-2" th:text="${item.regularCount}"></td>
+                <td class="text-end pe-2" th:text="${item.irregularCount}"></td>
+                <td class="text-end pe-2" th:text="${item.othersCount}"></td>
+                <td class="text-end pe-2" th:text="${item.curMonthCount}"></td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="report/report-header :: notfound"></div>
+</div>
+</body>
+</html>

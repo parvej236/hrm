@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="|Upload Photo|">m</title>
+  <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="|Upload Photo|">Create New</h4>
+<div id="content" layout:fragment="content">
+
+  <form method="post">
+    <div class="row mb-2">
+      <div class="col-sm-4"></div>
+      <div class="col-sm-8">
+        <div class="input-group">
+          <input class="form-control autocomplete employeeSearch"
+                 placeholder="Type reg / employee id to search" id="employeeSearch" autocomplete="off"
+                 data-search-url="/get-employees-by-employee-info?employeeInfo="
+                 required>
+          <span class="input-group-text" role="button">
+                                <i class="bi bi-search"></i></span>
+          <span class="input-group-text rounded-end" role="button"
+                onclick="clearEmployee()">Clear</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-2">
+      <div class="col-md-4 text-start initial-display d-none">
+        <input type="hidden" name="employeeId" id="employeeId">
+        <input type="hidden" name="imagePath" id="imagePath">
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#imageModal">
+          <img th:id="formImageOld" th:src="@{#}" alt="available" th:high="130" th:width="120" style="display:none;"/>
+          <img th:id="formImageNew" th:src="@{/resources/img/no_image.jpeg}" alt="unavailable" th:high="130" th:width="120"/>
+        </button>
+      </div>
+      <div class="col-md-8 text-start">
+        <div class="row">
+          <div class="fw-bolder form-control-plaintext" id="employeeName"></div>
+        </div>
+        <div class="row">
+          <div class="fw-bolder form-control-plaintext" id="designationName"></div>
+        </div>
+        <div class="row">
+          <div class="fw-bold form-control-plaintext" id="employeeIdDisplay"></div>
+        </div>
+        <div class="row">
+          <div class="fw-bold form-control-plaintext" id="employeeStatus"></div>
+        </div>
+        <div class="row">
+          <div class="fw-bold form-control-plaintext" id="departmentName"></div>
+        </div>
+        <div class="row">
+          <div class="fw-bold form-control-plaintext" id="dateOfBirth"></div>
+        </div>
+        <div class="row">
+          <div class="col fw-bold form-control-plaintext" id="employeePhone"></div>
+          <div class="col fw-bold form-control-plaintext" id="employeeEmail"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="imageModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="imageModalLabel">Upload Image</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <img th:id="modalImageOld" th:src="@{#}" th:high="130" th:width="120"/>
+            <img th:id="modalImageNew" th:src="@{/resources/img/no_image.jpeg}" th:high="130" th:width="120" style="display: none;"/>
+            <img th:id="newImageData" th:src="@{#}" class="avatar" th:high="130" th:width="120"/>
+            <br>
+            <br>
+            <input class="form-control" id="modalImg" type="file" onchange="convertImgToBase64(event)">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="uploadImage()">Upload</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </form>
+
+  <script th:inline="javascript">
+    const statusMap = new Map()
+    statusMap.set(1, "Regular")
+    statusMap.set(2, "Irregular")
+    statusMap.set(4, "Muster Roll")
+    statusMap.set(6, "Contractual")
+    statusMap.set(7, "Part-Time")
+    statusMap.set(8, "Honorary")
+    statusMap.set(9, "Probationary")
+    statusMap.set(11, "Resigned")
+    statusMap.set(12, "Suspended")
+    statusMap.set(13, "Dismissed")
+    statusMap.set(18, "Absent")
+    statusMap.set(19, "Deceased")
+
+    const oldImage = document.getElementById('formImageOld')
+    const newImage = document.getElementById('formImageNew')
+
+    const modalOldImage = document.getElementById('modalImageOld')
+    const modalNewImage = document.getElementById('modalImageNew')
+    const imageData = document.getElementById('newImageData')
+
+    const initDisplay = document.querySelector('.initial-display')
+
+    function renderEmployee(searchKey, employee) {
+      return `
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div>${employee.nameEn} - ${employee.designationName}</div>
+                    </div>
+                </div>
+            `
+    }
+
+    function selectEmployee(searchInput, employee) {
+      initDisplay.classList.remove('d-none')
+      initDisplay.classList.add('d-block')
+
+      document.getElementById("employeeId").value = employee.id
+      document.getElementById("employeeName").innerText = employee.nameEn
+      document.getElementById("designationName").innerText = employee.designationName
+      document.getElementById("employeeIdDisplay").innerText = `${employee.hiring.split('/')[2].substr(-2)}${employee.employeeId}`
+      document.getElementById("employeeStatus").innerText = employee.status
+      document.getElementById("departmentName").innerText = employee.branchName + (employee.departmentName ? ' (' + employee.departmentName + ')' : '')
+      document.getElementById("dateOfBirth").innerText = employee.dateOfBirth
+      document.getElementById("employeePhone").innerText = employee.primaryPhone
+      document.getElementById("employeeEmail").innerText = employee.primaryEmail
+      document.getElementById("imagePath").value = employee.imagePath
+
+      const getImageUrl = '/employee/image/download'
+      const path = employee.imagePath
+
+      if (path) {
+        oldImage.style.display = 'block'
+        newImage.style.display = 'none'
+
+        modalOldImage.style.display = 'block'
+        modalNewImage.style.display = 'none'
+
+        fetch(generateRequestURL(getImageUrl, {path: path}))
+                .then(response => response.json())
+                .then(image => {
+                  document.getElementById('formImageOld').src = image.data
+                  document.getElementById('modalImageOld').src = image.data
+                })
+      } else {
+        modalOldImage.style.display = 'none'
+        modalNewImage.style.display = 'block'
+      }
+    }
+
+    function clearEmployee() {
+      initDisplay.classList.add('d-none')
+      initDisplay.classList.remove('d-block')
+
+      oldImage.style.display = 'none'
+      newImage.style.display = 'block'
+
+      modalOldImage.style.display = 'block'
+      modalNewImage.style.display = 'none'
+
+      document.getElementById("employeeId").value = ''
+      document.getElementById("employeeName").innerText = ''
+      document.getElementById("designationName").innerText = ''
+      document.getElementById("employeeIdDisplay").innerText = ''
+      document.getElementById("employeeStatus").innerText = ''
+      document.getElementById("departmentName").innerText = ''
+      document.getElementById("dateOfBirth").innerText = ''
+      document.getElementById("employeePhone").innerText = ''
+      document.getElementById("employeeEmail").innerText = ''
+      document.getElementById("imagePath").value = ''
+      document.querySelector(".employeeSearch").value = ''
+      document.querySelector(".employeeSearch").focus()
+    }
+
+    function convertImgToBase64(event) {
+      let file = event.target.files[0]
+      getBase64(file).then(data => {
+        document.getElementById('newImageData').src = data
+      })
+    }
+
+    function uploadImage() {
+      let image = {}
+      const id = document.getElementById('employeeId').value
+      const imageData = document.getElementById('newImageData').src
+      image.objId = id
+      image.data = imageData
+      image.folder = 'images'
+      image.name = id + '_' + Date.now()
+
+      let url = '/employee/image/upload'
+
+      postForJson(url, image).then(response => {
+        if(response){
+          oldImage.style.display = 'block'
+          newImage.style.display = 'none'
+
+          document.getElementById('imagePath').value = response.path
+          const path = response.path
+
+          if (path) {
+            document.getElementById('formImageOld').src = response.data
+          } else {
+            document.getElementById('formImageNew').src = response.data
+          }
+        }
+      }).catch((error) => {
+        console.error(error)
+      })
+
+      new BSN.Modal('#imageModal').hide()
+    }
+
+    function getBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = error => reject(error)
+      })
+    }
+
+    (()=>{
+      const employee = document.querySelectorAll(".employeeSearch");
+      for (const el of employee) {
+        new AutoComplete(el, renderEmployee, selectEmployee)
+      }
+    })()
+  </script>
+</div>
+</body>
+</html>

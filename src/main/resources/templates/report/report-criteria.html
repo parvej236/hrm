@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Report Criteria</title>
+
+    <script type="text/javascript" th:src="@{/resources/js/papaparse.min.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/js/pdfmake.min.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/js/vfs_fonts.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/js/pdf-utils.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/js/csv-utils.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/js/report.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/vfs/noto-sans-english.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/vfs/noto-sans-bengali.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header">Report Criteria</h4>
+<div id="content" layout:fragment="content">
+
+    <form @submit.prevent="onSubmit">
+
+        <!-- Report Criteria -->
+        <div class="row">
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Report Type</label>
+                <select class="form-select" id="reportType" v-model="criteria.reportType" required>
+                    <option th:each="rt:${reportTypes}"
+                            th:value="${rt.key}"
+                            th:text="${rt.value}"
+                    ></option>
+                </select>
+            </div>
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Branch</label>
+                <div class="input-group">
+                    <select class="form-select" id="branch" v-model="criteria.branch" onchange="setDeptOption(this.value)" required>
+                        <option value="0">Select Branch</option>
+                        <option th:each="branch:${branchList}"
+                                th:value="${branch.id}"
+                                th:text="${branch.name}"
+                        ></option>
+                    </select>
+                    &nbsp;&nbsp;
+                    <input type="checkbox" id="withSubsidiary" v-model="criteria.withSubsidiary" class="form-check-input">
+                    &nbsp;&nbsp;
+                    <label for="withSubsidiary" class="form-check-label">With Subsidiary</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Department</label>
+                <div class="input-group">
+                    <select class="form-select" id="departmentId" v-model="criteria.departments" multiple size="3">
+                    </select>
+                    &nbsp;&nbsp;
+                    <input type="checkbox" class="form-check-input" id="departmentWithSub" v-model="criteria.departmentWithSub">
+                    &nbsp;&nbsp;
+                    <label for="departmentWithSub" class="form-check-label">With Subsidiary</label>
+                </div>
+            </div>
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Designation</label>
+                <select class="form-select" id="designation" v-model="criteria.designations" multiple size="3">
+                    <option th:each="designation:${designationMap}"
+                            th:value="${designation.key}"
+                            th:text="${designation.value}"
+                    ></option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Status</label>
+                <select class="form-select" id="status" v-model="criteria.statuses" multiple size="3">
+                    <option th:each="mStatus: ${empStatusMap}"
+                            th:value="${mStatus.key}"
+                            th:text="${mStatus.value}"
+                    ></option>
+                </select>
+            </div>
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Arbitrary</label>
+                <div class="input-group">
+                    <select class="form-select w-25" id="arbitraryType" v-model="criteria.arbitraryType">
+                        <option value="EID" th:text="|Employee ID|"></option>
+                        <option value="REG" th:text="|Reg. No.|"></option>
+                    </select>
+                    <textarea v-model="criteria.arbitrary" id="arbitrary" rows="3" class="form-control w-75"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Religion</label>
+                <select class="form-select" id="religion" v-model="criteria.religion">
+                    <option value="">Select Religion</option>
+                    <option th:each="religion:${religionMap}"
+                            th:value="${religion.value}"
+                            th:text="${religion.value}"
+                    ></option>
+                </select>
+            </div>
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Home District</label>
+                <select class="form-select" id="district" v-model="criteria.district">
+                    <option value="">Select District</option>
+                    <option th:each="district:${districts}"
+                            th:value="${district.name}"
+                            th:text="${district.name}"
+                    ></option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-sm-6" id="dateRangeId">
+                <label class="col-form-label fw-bold">Date</label>
+                <div class="col-sm-12">
+                    <div class="input-group">
+                        <select class="form-select" v-model="criteria.dateType">
+                            <option th:each="dateType : ${dateTypeMap}" th:value="${dateType.key}" th:text="${dateType.value}"></option>
+                        </select>
+                        <span for="dateFrom" class="input-group-text fw-bold">From</span>
+                        <input id="dateFrom" maxlength="10" v-model="criteria.dateFrom"  placeholder="DD/MM/YYYY" type="text" class="form-control" />
+                        <span for="dateTo" class="input-group-text fw-bold">To</span>
+                        <input id="dateTo" maxlength="10" v-model="criteria.dateTo" placeholder="DD/MM/YYYY" type="text" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Gender</label>
+                <select class="form-select" id="gender" v-model="criteria.gender">
+                    <option value="">Select Gender</option>
+                    <option th:each="gender: ${genderMap}"
+                            th:value="${gender.value}"
+                            th:text="${gender.value}"
+                    ></option>
+                </select>
+            </div>
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Marital Status</label>
+                <select class="form-select" id="maritalStatus" v-model="criteria.maritalStatus">
+                    <option value="">Select Marital Status</option>
+                    <option th:each="mStatus: ${maritalStatusMap}"
+                            th:value="${mStatus.value}"
+                            th:text="${mStatus.value}"
+                    ></option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-sm-12">
+                <label class="col-form-label fw-bold">Sort By</label>
+                <div class="input-group">
+                    <select class="form-select" id="sortingOrder1" v-model="criteria.sortingOrder1">
+                        <option th:each="sort: ${sortingOrderMap}"
+                                th:value="${sort.key}"
+                                th:text="${sort.value}"
+                        ></option>
+                    </select>
+                    <select class="form-select" id="sortingType1" v-model="criteria.sortingType1">
+                        <option value="ASC" th:text="Ascending"></option>
+                        <option value="DESC" th:text="Descending"></option>
+                    </select>
+                    <select class="form-select" id="sortingOrder2" v-model="criteria.sortingOrder2">
+                        <option th:each="sort: ${sortingOrderMap}"
+                                th:value="${sort.key}"
+                                th:text="${sort.value}"
+                        ></option>
+                    </select>
+                    <select class="form-select" id="sortingType2" v-model="criteria.sortingType2">
+                        <option value="ASC" th:text="Ascending"></option>
+                        <option value="DESC" th:text="Descending"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group col-sm-6">
+                <label class="col-form-label fw-bold">Format</label>
+                <div class="col-sm-10">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" v-model="criteria.format" value="HTML" id="formatHTML">
+                        <label class="form-check-label" for="formatHTML">HTML</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" v-model="criteria.format" value="PDF" id="formatPDF">
+                        <label class="form-check-label" for="formatPDF">PDF</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" v-model="criteria.format" value="CSV" id="formatCSV">
+                        <label class="form-check-label" for="formatCSV">CSV</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-section">
+            <button type="submit" class="btn btn-primary">Generate Report</button>
+        </div>
+
+    </form>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const loggedInUser = /*[[${loggedInUser}]]*/ ""
+        const reportUrl = /*[[${T(bd.org.quantum.hrm.common.Routes).EMP_REPORT_GENERATE}]]*/ "EMP_REPORT_GENERATE"
+        const reportEmployeeList = /*[[${T(bd.org.quantum.hrm.report.ReportType).EMPLOYEE_LIST}]]*/ "EMPLOYEE_LIST"
+        const reportEmployeePhoneList = /*[[${T(bd.org.quantum.hrm.report.ReportType).EMPLOYEE_PHONE_LIST}]]*/ "EMPLOYEE_PHONE_LIST"
+        const reportEmployeeListDetails = /*[[${T(bd.org.quantum.hrm.report.ReportType).EMPLOYEE_LIST_DETAILS}]]*/ "EMPLOYEE_LIST_DETAILS"
+        const reportEmployeeStatementMonthly = /*[[${T(bd.org.quantum.hrm.report.ReportType).EMPLOYEE_STATEMENT_MONTHLY}]]*/ "EMPLOYEE_STATEMENT_MONTHLY"
+        const reportDesignationWiseEmployee = /*[[${T(bd.org.quantum.hrm.report.ReportType).EMPLOYEE_STATEMENT_DESIGNATION_WISE}]]*/ "EMPLOYEE_STATEMENT_DESIGNATION_WISE"
+        const deptByBranchUrl = /*[[${T(bd.org.quantum.hrm.common.Routes).DEPARTMENT_BY_BRANCH}]]*/ "DEPARTMENT_BY_BRANCH"
+        /*]]>*/
+
+        function setDeptOption(branchId) {
+            let url = deptByBranchUrl .replace('{branchId}', branchId)
+            fetch(url).then(response => response.json()).then(data => {
+                let dropdownDept = document.getElementById('departmentId')
+
+                if (dropdownDept !== null){
+                    dropdownDept.length = 0
+                    for (let i = 0; i < data.length; i++) {
+                        dropdownDept.add(getOption(data[i]['name'], data[i]['id']))
+                    }
+                }
+            })
+        }
+
+        const app = {
+            data() {
+                return {
+                    criteria: {
+                        reportType: 'EMPLOYEE_LIST',
+                        branch: 0,
+                        branchName: null,
+                        withSubsidiary: false,
+                        departments: [],
+                        departmentWithSub: false,
+                        designations: [],
+                        statuses: [],
+                        religion: '',
+                        district: '',
+                        gender: '',
+                        maritalStatus: '',
+                        arbitraryType: 'UID',
+                        arbitrary: null,
+                        dateType: null,
+                        dateFrom: null,
+                        dateTo: null,
+                        sortingOrder1: 'DESIGNATION',
+                        sortingOrder2: 'JOINING_DATE',
+                        sortingType1: 'ASC',
+                        sortingType2: 'ASC',
+                        format: 'HTML',
+                    },
+                    reportResult: {},
+                    DD_MM_YYYY: DD_MM_YYYY_PATTERN,
+                    loading: true,
+                }
+            },
+
+            mounted() {
+                applyDatepicker(document.querySelector('#dateFrom'), this.criteria.dateFrom, null, (e) => {
+                    this.criteria.dateFrom = e.target.value
+                })
+
+                applyDatepicker(document.querySelector('#dateTo'), this.criteria.dateTo, null, (e) => {
+                    this.criteria.dateTo = e.target.value
+                })
+            },
+
+            methods: {
+
+                onSubmit(e) {
+                    const data = this.criteria
+                    const branchEl = document.querySelector('#branch')
+                    data.branchName = branchEl.selectedIndex < 0 ? loggedInUser.branchName : branchEl.options[branchEl.selectedIndex].text
+
+                    let format = data.format
+                    let url = reportUrl + '?format=' + format
+                    let newTab = window.open('', '_blank')
+                    if (format === 'HTML') {
+                        postForText(url, data).then(response => {
+                            newTab.document.write(response);
+                        })
+                    } else {
+                        url = url.replace('CSV', 'PDF')
+                        postForJson(url, data).then(response => {
+                            this.getReport(response, data, format)
+                        })
+                    }
+                },
+
+                getReport(reportData, criteria, format) {
+                    if (reportEmployeeList === criteria.reportType || reportEmployeePhoneList === criteria.reportType) {
+                        if (format === 'PDF') {
+                            generateEmployeeListPdfReport(reportData)
+                        } else {
+                            generateEmployeeListCsvReport(reportData)
+                        }
+                    } else if (reportEmployeeListDetails === criteria.reportType) {
+                        if (format === 'PDF') {
+                            generateEmployeeListDetailsPdfReport(reportData)
+                        } else {
+                            generateEmployeeListDetailsCsvReport(reportData)
+                        }
+                    } else if (reportEmployeeStatementMonthly === criteria.reportType) {
+                        if (format === 'PDF') {
+                            generateEmployeeStatementMonthlyPdfReport(reportData)
+                        } else {
+                            generateEmployeeStatementMonthlyCsvReport(reportData)
+                        }
+                    } else if (reportDesignationWiseEmployee === criteria.reportType) {
+                        if (format === 'PDF') {
+                            generateDesignationWiseEmployeePdfReport(reportData)
+                        } else {
+                            generateDesignationWiseEmployeeCsvReport(reportData)
+                        }
+                    }
+
+                }
+            }
+        }
+
+        Vue.createApp(app).mount('#content')
+    </script>
+</div>
+</body>
+</html>

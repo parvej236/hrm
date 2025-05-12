@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+  <title>Donation Report</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="shortcut icon" type="image/x-icon" th:href="@{/resources/images/favicon.ico}">
+  <link rel="stylesheet" type="text/css" th:href="@{/resources/css/bootstrap/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/resources/styles/report-style.css}"/>
+
+</head>
+<body>
+
+<div class="container bg-white pt-3 px-md-5 border min-vh-100">
+  <div class="header">
+    <div class="row">
+      <div class="col-1"><img src="/resources/images/logo.svg" width="70" height="70" alt="logo" class="logo"></div>
+      <div class="col-6 text-start">
+        <h2>Quantum Foundation</h2>
+        <h5 th:text="*{reportData.header.department}"></h5>
+      </div>
+      <div class="col-5 text-end">
+        <h4 th:text="*{reportData.header.title}"></h4>
+        <h6 th:text="*{reportData.header.duration}"></h6>
+        <h6 th:text="*{reportData.header.subTitle}"></h6>
+      </div>
+    </div>
+  </div>
+
+  <div layout:fragment="content"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <title>Movements</title>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="|Movement List|"></h4>
+<div layout:fragment="content">
+    <div class="border rounded-2 bg-white p-2 mb-2">
+        <form method="post" th:action="@{${T(bd.org.quantum.hrm.common.Routes).MOVEMENTS}}" th:object="${criteria}">
+            <div class="row mb-2">
+                <div class="col">
+                    <a type="button" class="dt-button bi-plus btn btn-primary" th:href="${T(bd.org.quantum.hrm.common.Routes).ADD_MOVEMENT}">Create New</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="input-group">
+                        <input type="hidden" id="employeeId" name="employee">
+                        <input class="form-control autocomplete employeeSearch"
+                               placeholder="Type reg / employee id to search" id="employeeSearch" autocomplete="off"
+                               data-search-url="/get-employees-by-employee-info?employeeInfo=">
+                        <span class="input-group-text" role="button">
+                                <i class="bi bi-search"></i></span>
+                        <span class="input-group-text rounded-end" role="button"
+                              onclick="clearEmployee()">Clear</span>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <select class="form-select" id="branchId" th:field="*{branch}">
+                        <option value="0">Search by branch</option>
+                        <option th:each="branch : ${branchList}" th:value="${branch.id}" th:text="${branch.name}"></option>
+                    </select>
+                </div>
+                <div class="col-3">
+                    <select class="form-select" id="deptId" th:field="*{department}"></select>
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100" th:text="#{button.search}">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div th:if="${movementList != null && #lists.size(movementList) > 0}">
+        <table class="table table-responsive bg-white shadow">
+            <thead>
+            <tr>
+                <th>Action</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Designation</th>
+                <th>Department</th>
+                <th>C/B/C</th>
+                <th>Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block  th:each="item : ${movementList}">
+                <tr>
+                    <td><a type="button" class="btn btn-secondary btn-sm" th:href="${updateUrl + item.movementId}" target="_blank">Open</a></td>
+                    <td th:text="${item.employeeId}"></td>
+                    <td th:text="${item.name}"></td>
+                    <td th:text="${item.designationName}"></td>
+                    <td th:text="${item.departmentName}"></td>
+                    <td th:text="${item.branchName}"></td>
+                    <td th:text="${item.dateRange}"></td>
+                </tr>
+            </th:block>
+            </tbody>
+        </table>
+    </div>
+</div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        document.getElementById('branchId').addEventListener('change', loadDepartment)
+
+        function loadDepartment() {
+            const branchId = document.getElementById('branchId').value
+            const url = `/department-list/${branchId}`
+            const deptIdElement = document.getElementById('deptId')
+
+            const deptList = /*[[${departmentList}]]*/ null
+            const user = /*[[${loggedInUser}]]*/ null
+            const options = []
+            options.push(`<option value='0'>Search by department</option>`)
+
+            if (branchId !== undefined && branchId !== '0') {
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.map(dept => options.push(`<option value='${dept.id}'>${dept.name}</option>`))
+                        deptIdElement.innerHTML = options.join('')
+                    })
+                    .catch(error => {
+                        console.error('Error fetching department list:', error)
+                    });
+
+            } else if (deptList !== null) {
+                deptList.map(dept => options.push(`<option value='${dept.id}'>${dept.name}</option>`))
+                deptIdElement.innerHTML = options.join('')
+
+            } else if (user.departmentId !== null && user.departmentId > 0 && user.departmentName !== null && user.departmentName !== '') {
+                options.push(`<option value='${user.departmentId}'>${user.departmentName}</option>`)
+                deptIdElement.innerHTML = options.join('')
+
+            } else {
+                options.push(``)
+                deptIdElement.innerHTML = options.join('')
+            }
+        }
+
+        function renderEmployee(searchKey, employee) {
+            return `
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div>${employee.nameEn} - ${employee.designationName}</div>
+                    </div>
+                </div>
+            `
+        }
+
+        function selectEmployee(searchInput, employee) {
+            document.getElementById("employeeId").value = employee.id
+            document.querySelector(".employeeSearch").value = employee.nameEn
+        }
+
+        function clearEmployee() {
+            document.getElementById("employeeId").value = ""
+            document.querySelector(".employeeSearch").value = ""
+            document.querySelector(".employeeSearch").focus()
+        }
+
+        (() => {
+            const employee = document.querySelectorAll(".employeeSearch");
+            for (const el of employee) {
+                new AutoComplete(el, renderEmployee, selectEmployee)
+            }
+        })()
+
+        loadDepartment()
+    </script>
+</th:block>
+</body>
+</html>

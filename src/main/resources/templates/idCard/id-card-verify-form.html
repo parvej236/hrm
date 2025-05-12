@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="|Verify ID Card|"></title>
+    <link rel="stylesheet" type="text/css" th:href="@{/resources/css/bootstrap/bootstrap.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/resources/css/bootstrap/bootstrap-icons.css}">
+
+    <script type="text/javascript" th:src="@{/resources/js/bootstrap/bootstrap-native-v5.min.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/js/utils.js}"></script>
+    <style>
+        .id-card {
+            width: 320px;
+            height: 480px;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+        }
+        .front, .back {
+            padding: 10px;
+        }
+        .id-card-header {
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+        .id-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 2px solid #007bff;
+            object-fit: cover;
+            margin: 10px auto;
+        }
+        .text-details {
+            text-align: center;
+        }
+        .back .info-section {
+            margin-top: 70px;
+            text-align: center;
+        }
+        .blood-group {
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+            padding: 30px 0 30px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container my-5 d-flex justify-content-center" th:if="${idCard ne null}">
+    <div class="row">
+        <!-- Front Side -->
+        <div class="col-md-6">
+            <div class="id-card front">
+                <div class="id-card-header">
+                    <img src="/resources/images/logo.svg" width="50" height="50" alt="logo" style="color: white">
+                    <h5>Quantum Foundation</h5>
+                </div>
+                <div class="text-center">
+                    <img class="id-photo" th:src="${idCard.base64}" alt="Profile Photo"/>
+                </div>
+                <div class="text-details">
+                    <h6 class="fw-bolder" th:text="${idCard.employeeName}">Mohammad Sakil Hossain</h6>
+                    <p th:text="${idCard.designation}">Jt. Technotier</p>
+                    <p th:text="|${idCard.employeeId}|">ID: 1700787</p>
+                </div>
+                <div class="text-center mt-auto">
+                    <p class="fw-bold" th:text="|Valid up to ${#temporals.format(idCard.expireOn, 'dd MMMM yyyy')}|">Valid up to 31 December 2024</p>
+                </div>
+            </div>
+        </div>
+        <!-- Back Side -->
+        <div class="col-md-6">
+            <div class="id-card back">
+                <div class="text-center">
+                    <h6 class="mt-5" th:text="|${idCard.employeeId}|">ID: 1700787</h6>
+                    <h6 class="blood-group" th:text="|Blood Group: ${idCard.bloodGroup}|">Blood Group: B Positive</h6>
+                </div>
+                <div class="info-section">
+                    <p>31/V Shilpacharya Zainul Abedin Sarak, Shantinagar, Dhaka-1217</p>
+                    <p><i class="bi bi-telephone"></i> 01714974333, 01711671858</p>
+                    <p><i class="bi bi-envelope"></i> info@quantummethod.org.bd</p>
+                    <p><i class="bi bi-globe"></i> quantummethod.org.bd</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-flex align-items-center justify-content-center vh-100 bg-light" th:unless="${idCard ne null}">
+    <div class="text-center">
+        <h1 class="display-4 text-muted">Nothing Found</h1>
+        <p class="text-secondary">May be, the id card has been expired!</p>
+    </div>
+</div>
+</body>
+</html>

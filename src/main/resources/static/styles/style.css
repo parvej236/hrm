@@ -1,0 +1,28 @@
+#active-filter.btn .badge {
+    top: -15px;
+    right: -15px;
+}
+#settings-modal-body .form-switch {
+    padding-right: 2.5em;
+    padding-left: 0;
+}
+#settings-modal-body .form-check .form-check-input {
+    float: right;
+    margin-left: -1.5em;
+}
+canvas {
+    border-radius: 150px;
+    margin-right: 10px;
+}
+.left-side-modal .modal-dialog {
+    left: 40%;
+}
+.btn-toggle {
+    color: rgba(0, 0, 0, .65);
+}
+.bg-row-odd {
+    background-color: #f1f5f7 !important;
+}
+.mb-6 {
+    margin-bottom: 4.5rem !important;
+}

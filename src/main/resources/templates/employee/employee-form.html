@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="(${employee.id > 0} ? #{employee.form.update.title} : #{employee.form.create.title})">m</title>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+    <script type="text/javascript" th:src="@{/resources/js/employee.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="(${employee.id > 0} ? #{employee.form.update.title} : #{employee.form.create.title})">Create New</h4>
+<div id="content" layout:fragment="content">
+
+    <form method="post" th:object="${employee}">
+        <div class="card mb-1">
+            <div class="card-header">
+                <div class="row mb-1">
+                    <div class="col-sm-6">
+                        Personal Information<span class="text-danger">*</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <p th:if="${#fields.hasErrors('member')}" th:errorclass="error" th:errors="*{member}"></p>
+                            <input th:id="memberSearch"
+                                   class="form-control autocomplete member-search"
+                                   placeholder="Type member reg. code to search"
+                                   data-search-url="/members?regIdOrPhone=" autocomplete="off"
+                                   aria-describedby="addon-for-search">
+                            <span class="input-group-text" role="button" id="addon-for-search">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                            <span class="input-group-text rounded-end" role="button" onclick="clearMember()">
+                                        Clear
+                                    </span>
+                            <div class="invalid-feedback">
+                                <i class="bi bi-shield-exclamation"></i> Please type valid code.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-1">
+                    <div class="col-md-6">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#imageModal" th:if="${employee.id gt 0}">
+                                    <img th:id="formImageOld" th:src="@{#}" th:if="${employee.imagePath}" alt="available" th:high="130" th:width="120"/>
+                                    <img th:id="formImageNew" th:src="@{/resources/img/no_image.jpeg}" th:unless="${employee.imagePath}" alt="unavailable" th:high="130" th:width="120"/>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row mb-1">
+                            <label for="nameEn" class="col-sm-4 col-form-label" th:text="#{label.name.en}"></label>
+                            <div class="col-sm-8">
+                                <input type="hidden" th:id="member" th:field="*{member}">
+                                <input id="nameEn" type="text" class="form-control" th:field="*{nameEn}">
+                            </div>
+                        </div>
+                        <div class="row mb-1">
+                            <label for="nameBn" class="col-sm-4 col-form-label" th:text="#{label.name.bn}"></label>
+                            <div class="col-sm-8">
+                                <input id="nameBn" type="text" class="form-control" th:field="*{nameBn}">
+                            </div>
+                        </div>
+                        <div class="row mb-1">
+                            <label for="dateOfBirth" class="col-sm-4 col-form-label" th:text="#{label.date.of.birth}"></label>
+                            <div class="col-sm-8">
+                                <input id="dateOfBirth" type="text" class="form-control" th:field="*{dateOfBirth}">
+                            </div>
+                        </div>
+                        <div class="row mb-1">
+                            <label for="nationalId" class="col-sm-4 col-form-label" th:text="#{label.nid}"></label>
+                            <div class="col-sm-8">
+                                <input id="nationalId" type="text" class="form-control" th:field="*{nationalId}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-1">
+                    <label for="fathersName" class="col-sm-2 col-form-label" th:text="#{label.fathers.name}"></label>
+                    <div class="col-sm-4">
+                        <input id="fathersName" type="text" class="form-control" th:field="*{fathersName}">
+                    </div>
+                    <label for="nationalIdFather" class="col-sm-2 col-form-label" th:text="#{label.fathers.nid}"></label>
+                    <div class="col-sm-4">
+                        <input id="nationalIdFather" type="text" class="form-control" th:field="*{nationalIdFather}">
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="mothersName" class="col-sm-2 col-form-label" th:text="#{label.mothers.name}"></label>
+                    <div class="col-sm-4">
+                        <input id="mothersName" type="text" class="form-control" th:field="*{mothersName}">
+                    </div>
+                    <label for="nationalIdMother" class="col-sm-2 col-form-label" th:text="#{label.mothers.nid}"></label>
+                    <div class="col-sm-4">
+                        <input id="nationalIdMother" type="text" class="form-control" th:field="*{nationalIdMother}">
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="maritalStatus" class="col-sm-2 col-form-label" th:text="#{label.marital.status}"></label>
+                    <div class="col-sm-4">
+                        <select id="maritalStatus" class="form-select" th:field="*{maritalStatus}" >
+                            <option value=""></option>
+                            <option th:each="marri : ${maritalStatusMap}"
+                                    th:value="${marri.value}"
+                                    th:text="${marri.value}"
+                            ></option>
+                        </select>
+                    </div>
+                    <label for="dateOfMarriage" class="col-sm-2 col-form-label" th:text="#{label.date.of.marriage}"></label>
+                    <div class="col-sm-4">
+                        <input id="dateOfMarriage" type="text" class="form-control" th:field="*{dateOfMarriage}">
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="spouseName" class="col-sm-2 col-form-label" th:text="#{label.spouse.name}"></label>
+                    <div class="col-sm-4">
+                        <input id="spouseName" type="text" class="form-control" th:field="*{spouseName}">
+                    </div>
+                    <label for="nationalIdSpouse" class="col-sm-2 col-form-label" th:text="#{label.spouse.nid}"></label>
+                    <div class="col-sm-4">
+                        <input id="nationalIdSpouse" type="text" class="form-control" th:field="*{nationalIdSpouse}">
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="gender" class="col-sm-2 col-form-label" th:text="#{label.gender}"></label>
+                    <div class="col-sm-4">
+                        <select id="gender" class="form-select" th:field="*{gender}" >
+                            <option value=""></option>
+                            <option th:each="gender : ${genderMap}"
+                                    th:value="${gender.value}"
+                                    th:text="${gender.value}"
+                            ></option>
+                        </select>
+                    </div>
+                    <label for="religion" class="col-sm-2 col-form-label" th:text="#{label.religion}"></label>
+                    <div class="col-sm-4">
+                        <select id="religion" class="form-select" th:field="*{religion}" >
+                            <option value=""></option>
+                            <option th:each="religion : ${religionMap}"
+                                    th:value="${religion.value}"
+                                    th:text="${religion.value}"
+                            ></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="regCode" class="col-sm-2 col-form-label" th:text="#{label.reg.code}"></label>
+                    <div class="col-sm-4">
+                        <input id="regCode" type="text" class="form-control" th:field="*{regCode}">
+                    </div>
+                    <label for="bloodGroup" class="col-sm-2 col-form-label" th:text="#{label.blood.group}"></label>
+                    <div class="col-sm-4">
+                        <select id="bloodGroup" class="form-select" th:field="*{bloodGroup}" >
+                            <option value=""></option>
+                            <option th:each="blood : ${bloodGroupMap}"
+                                    th:value="${blood.value}"
+                                    th:text="${blood.value}"
+                            ></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-1">
+            <div class="card-header">
+                Official Information
+            </div>
+            <div class="card-body">
+                <div class="row mb-1">
+                    <input type="hidden" id="rowId" th:field="*{id}">
+                    <input type="hidden" id="status" th:field="*{status}">
+                    <input type="hidden" th:field="*{stage}">
+                    <input type="hidden" th:field="*{joinType}">
+                    <input type="hidden" th:field="*{isDeleted}">
+                    <input type="hidden" th:field="*{lastPromotionDate}">
+                    <input type="hidden" th:field="*{regularDate}">
+                    <input type="hidden" id="memberType" th:field="*{memberType}">
+                    <input type="hidden" id="presentDistrict" th:field="*{presentDistrict}">
+                    <input type="hidden" id="presentThana" th:field="*{presentThana}">
+                    <input type="hidden" id="presentUnion" th:field="*{presentUnion}">
+                    <input type="hidden" th:field="*{imagePath}" th:id="imagePath">
+
+                    <label for="joiningDate" class="col-sm-2 col-form-label">Joining Date<span th:if="${employee.id gt 0}" class="text-danger">*</span></label>
+                    <div class="col-sm-4">
+                        <input id="joiningDate" type="text" class="form-control" th:field="*{hiring}">
+                        <p th:if="${#fields.hasErrors('hiring')}" th:errorclass="error" th:errors="*{hiring}"></p>
+                    </div>
+                    <label for="employeeId" class="col-sm-2 col-form-label" th:text="#{label.employee.id}"></label>
+                    <div class="col-sm-4">
+                        <input type="hidden" th:field="*{employeeId}">
+                        <input type="hidden" th:field="*{tempEmployeeId}">
+                        <input th:if="${#lists.contains(tempEmpStatuses, employee.status) and employee.tempEmployeeId ne null}" id="tempEmpId" type="text" class="form-control-plaintext" th:value="${employee.tempEmployeeId}">
+                        <input th:if="${!#lists.contains(tempEmpStatuses, employee.status) and employee.employeeId ne null}" id="employeeId" type="text" class="form-control-plaintext" th:value="${employee.employeeId}">
+                        <p th:if="${#fields.hasErrors('employeeId')}" th:errorclass="error" th:errors="*{employeeId}"></p>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="branch" class="col-sm-2 col-form-label">C/B/C<span class="text-danger">*</span></label>
+                    <div class="col-sm-4">
+                        <input type="hidden" id="branchName" th:field="*{branchName}">
+                        <div class="input-group">
+                            <select id="branch" class="form-select" th:field="*{branch}" onchange="setBranchName(this)">
+                                <option value="0"></option>
+                                <option th:each="branch: ${branchList}" th:value="${branch.id}" th:text="${branch.name}">
+                                </option>
+                            </select>
+                            <input id="branchSearch" class="form-control" type="text" oninput="searchBranch(event)" placeholder="type to search branch">
+                            <div id="searchResults" class="dropdown-menu" style="display: none;"></div>
+                        </div>
+                        <p th:if="${#fields.hasErrors('branch')}" th:errorclass="error" th:errors="*{branch}"></p>
+                    </div>
+                    <label for="department" class="col-sm-2 col-form-label" th:text="#{label.department}"></label>
+                    <div class="col-sm-4">
+                        <input type="hidden" id="departmentName" th:field="*{departmentName}">
+                        <div class="input-group">
+                            <select id="department" class="form-select" th:field="*{department}" onchange="setDepartmentName()">
+                                <option value="0"></option>
+                                <option th:each="dept: ${departmentList}" th:value="${dept.id}" th:text="${dept.name}"></option>
+                            </select>
+                            <input id="deptSearch" class="form-control" type="text" oninput="searchDepartment(event)" placeholder="type to search department">
+                            <div id="deptSearchResults" class="dropdown-menu" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="designation" class="col-sm-2 col-form-label">Designation<span th:if="${employee.id gt 0}" class="text-danger">*</span></label>
+                    <div class="col-sm-4">
+                        <input type="hidden" id="designationName" th:field="*{designationName}">
+                        <div class="input-group">
+                            <select id="designation" class="form-select" th:field="*{designation.id}" onchange="setDesignationName(this)">
+                                <option value="0"></option>
+                                <option th:each="designation : ${designationMap}"
+                                        th:value="${designation.key}"
+                                        th:text="${designation.value}"
+                                ></option>
+                            </select>
+                            <input id="designationSearch" class="form-control" type="text" oninput="searchDesignation(event)" placeholder="type to search designation">
+                            <div id="designationSearchResults" class="dropdown-menu" style="display: none;"></div>
+                        </div>
+                        <p th:if="${#fields.hasErrors('designation')}" th:errorclass="error" th:errors="*{designation}"></p>
+                    </div>
+                    <label for="wpd" class="col-sm-2 col-form-label" th:text="#{label.wpd}"></label>
+                    <div class="col-sm-4">
+                        <select id="wpd" class="form-select" th:field="*{wpd}">
+                            <option value=""></option>
+                            <option th:each="day : ${weekDaysMap}"
+                                    th:value="${day.value}"
+                                    th:text="${day.value}"
+                            ></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="salaryLocation" class="col-sm-2 col-form-label" th:text="#{label.salary.location}"></label>
+                    <div class="col-sm-4">
+                        <select id="salaryLocation" class="form-select" th:field="*{salaryLocation}">
+                            <option th:each="location: ${locationMap}" th:value="${location.key}" th:text="${location.value}"></option>
+                        </select>
+                    </div>
+                    <label for="consumedYr" class="col-sm-2 col-form-label" th:text="#{label.consumed.yr}"></label>
+                    <div class="col-sm-4">
+                        <input id="consumedYr" type="number" class="form-control" th:field="*{preConsumedYr}">
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="responsibility" class="col-sm-2 col-form-label" th:text="#{label.responsibility}"></label>
+                    <div class="col-sm-4">
+                        <textarea id="responsibility" class="form-control" th:field="*{responsibility}"></textarea>
+                    </div>
+                    <label for="reference" class="col-sm-2 col-form-label" th:text="#{label.reference}"></label>
+                    <div class="col-sm-4">
+                        <textarea class="form-control" id="reference" th:field="*{reference}"></textarea>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="remarks" class="col-sm-2 col-form-label" th:text="#{label.remarks}"></label>
+                    <div class="col-sm-4">
+                        <textarea id="remarks" class="form-control" th:field="*{remarks}"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-1">
+            <div class="card-header">
+                Contact Information
+            </div>
+            <div class="card-body">
+                <div class="row mb-1">
+                    <label for="mailingAddress" class="col-sm-2 col-form-label" th:text="#{label.mailing.address}"></label>
+                    <div class="col-sm-4">
+                        <textarea class="form-control" id="mailingAddress" th:field="*{presentAddress}"></textarea>
+                    </div>
+                    <label for="permanentAddress" class="col-sm-2 col-form-label" th:text="#{label.permanent.address}"></label>
+                    <div class="col-sm-4">
+                        <textarea class="form-control" id="permanentAddress" th:field="*{permanentAddress}"></textarea>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="primaryPhone" class="col-sm-2 col-form-label" th:text="#{label.primary.phone}"></label>
+                    <div class="col-sm-4">
+                        <input id="primaryPhone" type="text" class="form-control" th:field="*{primaryPhone}">
+                    </div>
+                    <label for="primaryEmail" class="col-sm-2 col-form-label" th:text="#{label.primary.email}"></label>
+                    <div class="col-sm-4">
+                        <input id="primaryEmail" type="email" class="form-control" th:field="*{primaryEmail}">
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <label for="secondaryPhone" class="col-sm-2 col-form-label" th:text="#{label.secondary.phone}"></label>
+                    <div class="col-sm-4">
+                        <input id="secondaryPhone" type="text" class="form-control" th:field="*{secondaryPhone}">
+                    </div>
+                    <label for="secondaryEmail" class="col-sm-2 col-form-label" th:text="#{label.secondary.email}"></label>
+                    <div class="col-sm-4">
+                        <input id="secondaryEmail" type="email" class="form-control" th:field="*{secondaryEmail}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${employee.id gt 0 and hasDetailsViewAccess}">
+            <div class="accordion mb-1" id="statusAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="statusHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#statusInfo" aria-expanded="false" aria-controls="statusInfo">
+                            Status Information
+                        </button>
+                    </h2>
+                    <div id="statusInfo" class="accordion-collapse collapse" aria-labelledby="headingStatus" data-bs-parent="#statusAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-5 offset-7 text-end manage-status-button d-block">
+                                    <a class="link-primary" href="#statusAccordion" onclick="addStatusRow()">
+                                        Manage Status Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${statusInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="statusTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-2" rowspan="2">Date</th>
+                                    <th scope="col" class="col-6" colspan="2">Status</th>
+                                    <th scope="col" class="col-3" rowspan="2">Remarks</th>
+                                    <th scope="col" class="col-1" rowspan="2">Action</th>
+                                </tr>
+                                <tr>
+                                    <th>From</th>
+                                    <th>To</th>
+                                </tr>
+                                </thead>
+                                <tbody th:with="statusSize=${#lists.size(statusInfoList)}">
+                                <tr th:each="status: ${statusInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext status-view-${statusStat.index} d-block|" th:text="${#temporals.format(status.dateFrom,'dd/MM/yyyy')}"></label>
+                                        <input type="hidden" th:id="|statusId_${statusStat.index}|" th:value="${status.id}">
+                                        <input type="text" th:id="|dateFrom_${statusStat.index}|" th:class="|form-control status-update-${statusStat.index} d-none|" th:value="${status.dateFrom}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext status-view-${statusStat.index} d-block|" th:text="${status.statusFrom}"></label>
+                                        <select th:id="|statusFrom_${statusStat.index}|" th:class="|form-select status-update-${statusStat.index} d-none|">
+                                            <option value="0">-Please Select-</option>
+                                            <option th:each="map: ${empStatusMap}" th:value="${map.key}" th:text="${map.value}" th:attrappend="selected=${status.statusFrom eq map.key ? 'selected' : ''}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext status-view-${statusStat.index} d-block|" th:text="${status.statusTo}"></label>
+                                        <select th:id="|statusTo_${statusStat.index}|" th:class="|form-select status-update-${statusStat.index} d-none|">
+                                            <option value="0">-Please Select-</option>
+                                            <option th:each="map: ${empStatusMap}" th:value="${map.key}" th:text="${map.value}" th:attrappend="selected=${status.statusTo eq map.key ? 'selected' : ''}" ></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext status-view-${statusStat.index} d-block|" th:text="${status.comments}"></label>
+                                        <input th:id="|comments_${statusStat.index}|" th:class="|form-control status-update-${statusStat.index} d-none|" th:value="${status.comments}" >
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary status-view-${statusStat.index} d-inline-block d-block|" href="#statusAccordion" th:onclick="|editStatus(${statusStat.index})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary status-update-${statusStat.index} d-inline-block d-none|" href="#statusAccordion" th:onclick="|putStatus(${statusStat.index}, ${statusSize eq statusStat.count})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary status-view-${statusStat.index} d-inline-block d-block|" href="#statusAccordion" th:onclick="|deleteStatus(${statusStat.index}, ${statusSize eq statusStat.count})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary status-update-${statusStat.index} d-inline-block d-none|" href="#statusAccordion" th:onclick="|restoreStatus(${statusStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="promotionAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="promotionHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#promotionInfo" aria-expanded="false" aria-controls="promotionInfo">
+                            Promotion Information
+                        </button>
+                    </h2>
+                    <div id="promotionInfo" class="accordion-collapse collapse" aria-labelledby="headingPromotion" data-bs-parent="#promotionAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-5 offset-7 text-end manage-promotion-button d-block">
+                                    <a class="link-primary" href="#promotionAccordion" onclick="addPromotionRow()">
+                                        Manage Promotion Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${promotionInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="promotionTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-2" rowspan="2">Date</th>
+                                    <th scope="col" class="col-2" rowspan="2">Type</th>
+                                    <th scope="col" class="col-5" colspan="2">Designation</th>
+                                    <th scope="col" class="col-2" rowspan="2">Remarks</th>
+                                    <th scope="col" class="col-1" rowspan="2">Action</th>
+                                </tr>
+                                <tr>
+                                    <th>From</th>
+                                    <th>To</th>
+                                </tr>
+                                </thead>
+                                <tbody th:with="promoSize=${#lists.size(promotionInfoList)}">
+                                <tr th:each="promo: ${promotionInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext promotion-view-${promoStat.index} d-block|" th:text="${#temporals.format(promo.dateFrom,'dd/MM/yyyy')}"></label>
+                                        <input type="hidden" th:id="|promotionId_${promoStat.index}|" th:value="${promo.id}">
+                                        <input type="text" th:id="|promoDateFrom_${promoStat.index}|" th:class="|form-control promotion-update-${promoStat.index} d-none|" th:value="${promo.dateFrom}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext promotion-view-${promoStat.index} d-block|" th:text="${promo.type}"></label>
+                                        <select th:id="|type_${promoStat.index}|" th:class="|form-select promotion-update-${promoStat.index} d-none|">
+                                            <option th:each="type : ${typeMap}" th:value="${type.key}" th:text="${type.value}" th:attrappend="selected=${promo.type eq type.key ? 'selected' : ''}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext promotion-view-${promoStat.index} d-block|" th:text="${promo.designationFrom}"></label>
+                                        <select th:id="|designationFrom_${promoStat.index}|" th:class="|form-select promotion-update-${promoStat.index} d-none|">
+                                            <option value="0">-Please Select-</option>
+                                            <option th:each="designation : ${designationMap}" th:value="${designation.value}" th:attrappend="selected=${promo.designationFrom eq designation.value ? 'selected' : ''}" th:text="${designation.value}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext promotion-view-${promoStat.index} d-block|" th:text="${promo.designationTo}"></label>
+                                        <select th:id="|designationTo_${promoStat.index}|" th:class="|form-select promotion-update-${promoStat.index} d-none|">
+                                            <option value="0">-Please Select-</option>
+                                            <option th:each="designation : ${designationMap}" th:data-rowid="${designation.key}" th:value="${designation.value}" th:attrappend="selected=${promo.designationTo eq designation.value ? 'selected' : ''}" th:text="${designation.value}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext promotion-view-${promoStat.index} d-block|" th:text="${promo.comments}"></label>
+                                        <input type="text" th:id="|degComments_${promoStat.index}|" th:class="|form-control promotion-update-${promoStat.index} d-none|" th:value="${promo.comments}">
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary promotion-view-${promoStat.index} d-inline-block d-block|" href="#promotionAccordion" th:onclick="|editPromotion(${promoStat.index})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary promotion-update-${promoStat.index} d-inline-block d-none|" href="#promotionAccordion" th:onclick="|putPromotion(${promoStat.index}, ${promoSize eq promoStat.count})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary promotion-view-${promoStat.index} d-inline-block d-block|" href="#promotionAccordion" th:onclick="|deletePromotion(${promoStat.index}, ${promoSize eq promoStat.count})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary promotion-update-${promoStat.index} d-inline-block d-none|" href="#promotionAccordion" th:onclick="|restorePromotion(${promoStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="transferAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="transferHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#transferInfo" aria-expanded="false" aria-controls="transferInfo">
+                            Transfer Information
+                        </button>
+                    </h2>
+                    <div id="transferInfo" class="accordion-collapse collapse" aria-labelledby="headingTransfer" data-bs-parent="#transferAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-5 offset-7 text-end manage-transfer-button d-block">
+                                    <a class="link-primary" href="#transferAccordion" onclick="addTransferRow()">
+                                        Manage Transfer Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${transferInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="transferTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-2" rowspan="2">Date</th>
+                                    <th scope="col" class="col-3" colspan="2">From</th>
+                                    <th scope="col" class="col-3" colspan="2">To</th>
+                                    <th scope="col" class="col-3" rowspan="2">Comments</th>
+                                    <th scope="col" class="col-1" rowspan="2">Action</th>
+                                </tr>
+                                <tr>
+                                    <th>Center/Branch/Cell</th>
+                                    <th>Organ/Cell</th>
+                                    <th>Center/Branch/Cell</th>
+                                    <th>Organ/Cell</th>
+                                </tr>
+                                </thead>
+                                <tbody th:with="rowSize= ${#lists.size(transferInfoList)}">
+                                <tr th:each="transfer: ${transferInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext transfer-view-${transferStat.index} d-block|" th:text="${#temporals.format(transfer.transferDate,'dd/MM/yyyy')}"></label>
+                                        <input type="hidden" th:id="|transferId_${transferStat.index}|" th:value="${transfer.id}">
+                                        <input type="text" th:id="|transferDate_${transferStat.index}|" th:class="|form-control transfer-update-${transferStat.index} d-none|" th:value="${transfer.transferDate}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext transfer-view-${transferStat.index} d-block|" th:text="${transfer.branchFromName}"></label>
+                                        <select th:id="|branchFrom_${transferStat.index}|" th:class="|form-select branch-from branch-from-${transferStat.index} transfer-update-${transferStat.index} d-none|" th:onchange="|loadTransferDepartment(${transferStat.index}, ${transfer.departmentFrom})|">
+                                            <option value="0">Please Select</option>
+                                            <option th:each="branch : ${branchList}" th:value="${branch.id}" th:text="${branch.name}" th:attrappend="selected=${transfer.branchFrom eq branch.id ? 'selected' : ''}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext transfer-view-${transferStat.index} d-block|" th:text="${transfer.departmentFromName}"></label>
+                                        <select th:id="|departmentFrom_${transferStat.index}|" th:class="|form-select department-from department-from-${transferStat.index} transfer-update-${transferStat.index} d-none|">
+                                            <option value="0"></option>
+                                            <option th:each="dept : ${departmentList}" th:value="${dept.id}" th:text="${dept.name}" th:attrappend="selected=${transfer.departmentFrom eq dept.id ? 'selected' : ''}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext transfer-view-${transferStat.index} d-block|" th:text="${transfer.branchToName}"></label>
+                                        <select th:id="|branchTo_${transferStat.index}|" th:class="|form-select branch-to branch-to-${transferStat.index} transfer-update-${transferStat.index} d-none|" th:onchange="|loadTransferDepartment(${transferStat.index}, ${transfer.departmentTo}, 'to')|">
+                                            <option value="0">Please Select</option>
+                                            <option th:each="branch : ${branchList}" th:value="${branch.id}" th:text="${branch.name}" th:attrappend="selected=${transfer.branchTo eq branch.id ? 'selected' : ''}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext transfer-view-${transferStat.index} d-block|" th:text="${transfer.departmentToName}"></label>
+                                        <select th:id="|departmentTo_${transferStat.index}|" th:class="|form-select department-to department-to-${transferStat.index} transfer-update-${transferStat.index} d-none|">
+                                            <option value="0"></option>
+                                            <option th:each="dept : ${departmentList}" th:value="${dept.id}" th:text="${dept.name}" th:attrappend="selected=${transfer.departmentTo eq dept.id ? 'selected' : ''}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext transfer-view-${transferStat.index} d-block|" th:text="${transfer.comments}"></label>
+                                        <input type="text" th:id="|transferComments_${transferStat.index}|" th:class="|form-control transfer-update-${transferStat.index} d-none|" th:value="${transfer.comments}">
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary transfer-view-${transferStat.index} d-inline-block d-block|" href="#transferAccordion" th:onclick="|editTransfer(${transferStat.index});loadTransferDepartment(${transferStat.index}, ${transfer.departmentFrom});loadTransferDepartment(${transferStat.index}, ${transfer.departmentTo}, 'to')|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary transfer-update-${transferStat.index} d-inline-block d-none|" href="#transferAccordion" th:onclick="|putTransfer(${transferStat.index}, ${rowSize eq transferStat.count})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary transfer-view-${transferStat.index} d-inline-block d-block|" href="#transferAccordion" th:onclick="|deleteTransfer(${transferStat.index}, ${rowSize eq transferStat.count})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary transfer-update-${transferStat.index} d-inline-block d-none|" href="#transferAccordion" th:onclick="|restoreTransfer(${transferStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="attachedAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="attachedHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#attachedInfo" aria-expanded="false" aria-controls="attachedInfo">
+                            Attached with Foundation
+                        </button>
+                    </h2>
+                    <div id="attachedInfo" class="accordion-collapse collapse" aria-labelledby="headingAttached" data-bs-parent="#attachedAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                 <div class="col-5 offset-7 text-end manage-pre-join-button d-block">
+                                    <a class="link-primary" href="#attachedAccordion" onclick="addPreJoinRow()">
+                                        Manage Pre-Joining Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${preJoiningChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                 </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="preJoinTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-3">Center/Branch/Cell</th>
+                                    <th scope="col" class="col-3">Organ/Cell</th>
+                                    <th scope="col" class="col-5">Description</th>
+                                    <th scope="col" class="col-1">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="preJoin: ${preJoiningInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext preJoin-view-${preJoinStat.index} d-block|" th:text="${preJoin.branchName}"></label>
+                                        <input type="hidden" th:id="|preJoinId_${preJoinStat.index}|" th:value="${preJoin.id}">
+                                        <select th:id="|branch_${preJoinStat.index}|" th:class="|form-select preJoin-branch-${preJoinStat.index} preJoin-update-${preJoinStat.index} d-none|" th:onchange="|loadPreJoinDepartment(${preJoinStat.index},${preJoin.branch})|">
+                                            <option value="0">-Please Select-</option>
+                                            <option th:each="branch : ${branchList}" th:value="${branch.id}" th:text="${branch.name}" th:attrappend="selected=${preJoin.branch eq branch.id ? 'selected' : ''}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext preJoin-view-${preJoinStat.index} d-block|" th:text="${preJoin.departmentName}"></label>
+                                        <select th:id="|department_${preJoinStat.index}|" th:class="|form-select preJoin-dept-${preJoinStat.index} preJoin-update-${preJoinStat.index} d-none|">
+                                            <option value="0">-Please Select-</option>
+                                            <option th:each="dept : ${departmentList}" th:value="${dept.id}" th:text="${dept.name}" th:attrappend="selected=${preJoin.department eq dept.id ? 'selected' : ''}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext preJoin-view-${preJoinStat.index} d-block|" th:text="${preJoin.description}"></label>
+                                        <textarea rows="1" type="text" th:id="|description_${preJoinStat.index}|" th:class="|form-control preJoin-update-${preJoinStat.index} d-none|" th:value="${preJoin.description}"></textarea>
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary preJoin-view-${preJoinStat.index} d-inline-block d-block|" href="#attachedAccordion" th:onclick="|editPreJoin(${preJoinStat.index});loadPreJoinDepartment(${preJoinStat.index},${preJoin.branch})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary preJoin-update-${preJoinStat.index} d-inline-block d-none|" href="#attachedAccordion" th:onclick="|putPreJoin(${preJoinStat.index})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary preJoin-view-${preJoinStat.index} d-inline-block d-block|" href="#attachedAccordion" th:onclick="|deletePreJoin(${preJoinStat.index})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary preJoin-update-${preJoinStat.index} d-inline-block d-none|" href="#attachedAccordion" th:onclick="|restorePreJoin(${preJoinStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="khedmotaionAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="khedmotaionHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#khedmotaionInfo" aria-expanded="false" aria-controls="khedmotaionInfo">
+                            Khedmotaion Information
+                        </button>
+                    </h2>
+                    <div id="khedmotaionInfo" class="accordion-collapse collapse" aria-labelledby="headingKhedmotaion" data-bs-parent="#khedmotaionAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-5 offset-7 text-end manage-khedmotaion-button d-block">
+                                    <a class="link-primary" href="#khedmotaionAccordion" onclick="addKhedmotaionRow()">
+                                        Manage Khedmotaion Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${khedmotaionInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="khedmotaionTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-3">Center/Branch/Cell</th>
+                                    <th scope="col" class="col-3">Organ/Cell</th>
+                                    <th scope="col" class="col-5">Description</th>
+                                    <th scope="col" class="col-1">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="khedmotaion: ${khedmotInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext khedmotaion-view-${khedmotaionStat.index} d-block|" th:text="${khedmotaion.branchName}"></label>
+                                        <input type="hidden" th:id="|khedmotaionId_${khedmotaionStat.index}|" th:value="${khedmotaion.id}">
+                                        <select th:id="|branch_${khedmotaionStat.index}|" th:class="|form-select khedmotaion-update-${khedmotaionStat.index} khedmot-branch-${khedmotaionStat.index} d-none|" th:onchange="|loadKhedmotDepartment(${khedmotaionStat.index},${khedmotaion.branch})|">
+                                            <option value="0">-Please Select-</option>
+                                            <option th:each="branch : ${branchList}" th:value="${branch.id}" th:text="${branch.name}" th:attrappend="selected=${khedmotaion.branch eq branch.id ? 'selected' : ''}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext khedmotaion-view-${khedmotaionStat.index} d-block|" th:text="${khedmotaion.departmentName}"></label>
+                                        <select th:id="|department_${khedmotaionStat.index}|" th:class="|form-select khedmotaion-update-${khedmotaionStat.index} khedmot-dept-${khedmotaionStat.index} d-none|">
+                                            <option value="0">-Please Select-</option>
+                                            <option th:each="dept : ${departmentList}" th:value="${dept.id}" th:text="${dept.name}" th:attrappend="selected=${khedmotaion.department eq dept.id ? 'selected' : ''}"></option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext khedmotaion-view-${khedmotaionStat.index} d-block|" th:text="${khedmotaion.description}"></label>
+                                        <textarea rows="1" type="text" th:id="|description_${khedmotaionStat.index}|" th:class="|form-control khedmotaion-update-${khedmotaionStat.index} d-none|" th:value="${khedmotaion.description}"></textarea>
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary khedmotaion-view-${khedmotaionStat.index} d-inline-block d-block|" href="#khedmotaionAccordion" th:onclick="|editKhedmotaion(${khedmotaionStat.index});loadKhedmotDepartment(${khedmotaionStat.index},${khedmotaion.branch})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary khedmotaion-update-${khedmotaionStat.index} d-inline-block d-none|" href="#khedmotaionAccordion" th:onclick="|putKhedmotaion(${khedmotaionStat.index})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary khedmotaion-view-${khedmotaionStat.index} d-inline-block d-block|" href="#khedmotaionAccordion" th:onclick="|deleteKhedmotaion(${khedmotaionStat.index})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary khedmotaion-update-${khedmotaionStat.index} d-inline-block d-none|" href="#khedmotaionAccordion" th:onclick="|restoreKhedmotaion(${khedmotaionStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="academicAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="academicHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#academicInfo" aria-expanded="false" aria-controls="academicInfo">
+                            Academic Information
+                        </button>
+                    </h2>
+                    <div id="academicInfo" class="accordion-collapse collapse" aria-labelledby="headingAcademic" data-bs-parent="#academicAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-5 offset-7 text-end manage-education-button d-block">
+                                    <a class="link-primary" href="#academicAccordion" onclick="addEducationRow()">
+                                        Manage Academic Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${academicInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="educationTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-1">Exam Name</th>
+                                    <th scope="col" class="col-1">Passing Year</th>
+                                    <th scope="col" class="col-1">Result</th>
+                                    <th scope="col" class="col-2">Institute</th>
+                                    <th scope="col" class="col-2">Board</th>
+                                    <th scope="col" class="col-2">Subject/Department</th>
+                                    <th scope="col" class="col-2">Comments</th>
+                                    <th scope="col" class="col-1">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="education: ${educationInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext education-view-${educationStat.index} d-block|" th:text="${education.examName}"></label>
+                                        <input type="hidden" th:id="|educationId_${educationStat.index}|" th:value="${education.id}">
+                                        <input type="text" th:id="|examName_${educationStat.index}|" th:class="|form-control education-update-${educationStat.index} d-none|" th:value="${education.examName}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext education-view-${educationStat.index} d-block|" th:text="${education.passingYear}"></label>
+                                        <input type="text" th:id="|passingYear_${educationStat.index}|" th:class="|form-control education-update-${educationStat.index} d-none|" th:value="${education.passingYear}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext education-view-${educationStat.index} d-block|" th:text="${education.result}"></label>
+                                        <input type="text" th:id="|result_${educationStat.index}|" th:class="|form-control education-update-${educationStat.index} d-none|" th:value="${education.result}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext education-view-${educationStat.index} d-block|" th:text="${education.institution}"></label>
+                                        <input type="text" th:id="|institution_${educationStat.index}|" th:class="|form-control education-update-${educationStat.index} d-none|" th:value="${education.institution}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext education-view-${educationStat.index} d-block|" th:text="${education.board}"></label>
+                                        <input type="text" th:id="|board_${educationStat.index}|" th:class="|form-control education-update-${educationStat.index} d-none|" th:value="${education.board}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext education-view-${educationStat.index} d-block|" th:text="${education.subjectDepartment}"></label>
+                                        <input type="text" th:id="|subjectDepartment_${educationStat.index}|" th:class="|form-control education-update-${educationStat.index} d-none|" th:value="${education.subjectDepartment}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext education-view-${educationStat.index} d-block|" th:text="${education.comments}"></label>
+                                        <input type="text" th:id="|eduComments_${educationStat.index}|" th:class="|form-control education-update-${educationStat.index} d-none|" th:value="${education.comments}">
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary education-view-${educationStat.index} d-inline-block d-block|" href="#academicAccordion" th:onclick="|editEducation(${educationStat.index})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary education-update-${educationStat.index} d-inline-block d-none|" href="#academicAccordion" th:onclick="|putEducation(${educationStat.index})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary education-view-${educationStat.index} d-inline-block d-block|" href="#academicAccordion" th:onclick="|deleteEducation(${educationStat.index})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary education-update-${educationStat.index} d-inline-block d-none|" href="#academicAccordion" th:onclick="|restoreEducation(${educationStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="experienceAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="experienceHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#experienceInfo" aria-expanded="false" aria-controls="experienceInfo">
+                            Working Experience
+                        </button>
+                    </h2>
+                    <div id="experienceInfo" class="accordion-collapse collapse" aria-labelledby="headingExperience" data-bs-parent="#experienceAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-5 offset-7 text-end manage-experience-button d-block">
+                                    <a class="link-primary" href="#experienceAccordion" onclick="addExperienceRow()">
+                                        Manage Experience Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${experienceInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="experienceTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-2">Designation</th>
+                                    <th scope="col" class="col-3">Institution</th>
+                                    <th scope="col" class="col-1">Duration</th>
+                                    <th scope="col" class="col-3">Responsibility</th>
+                                    <th scope="col" class="col-2">Comments</th>
+                                    <th scope="col" class="col-1">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="experience: ${experienceInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext experience-view-${experienceStat.index} d-block|" th:text="${experience.designation}"></label>
+                                        <input type="hidden" th:id="|experienceId_${experienceStat.index}|" th:value="${experience.id}">
+                                        <input type="text" th:id="|designation_${experienceStat.index}|" th:class="|form-control experience-update-${experienceStat.index} d-none|" th:value="${experience.designation}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext experience-view-${experienceStat.index} d-block|" th:text="${experience.institution}"></label>
+                                        <input type="text" th:id="|expInstitution_${experienceStat.index}|" th:class="|form-control experience-update-${experienceStat.index} d-none|" th:value="${experience.institution}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext experience-view-${experienceStat.index} d-block|" th:text="${experience.duration}"></label>
+                                        <input type="text" th:id="|duration_${experienceStat.index}|" th:class="|form-control experience-update-${experienceStat.index} d-none|" th:value="${experience.duration}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext experience-view-${experienceStat.index} d-block|" th:text="${experience.responsibility}"></label>
+                                        <input type="text" th:id="|responsibility_${experienceStat.index}|" th:class="|form-control experience-update-${experienceStat.index} d-none|" th:value="${experience.responsibility}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext experience-view-${experienceStat.index} d-block|" th:text="${experience.comments}"></label>
+                                        <input type="text" th:id="|expComments_${experienceStat.index}|" th:class="|form-control experience-update-${experienceStat.index} d-none|" th:value="${experience.comments}">
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary experience-view-${experienceStat.index} d-inline-block d-block|" href="#experienceAccordion" th:onclick="|editExperience(${experienceStat.index})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary experience-update-${experienceStat.index} d-inline-block d-none|" href="#experienceAccordion" th:onclick="|putExperience(${experienceStat.index})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary experience-view-${experienceStat.index} d-inline-block d-block|" href="#experienceAccordion" th:onclick="|deleteExperience(${experienceStat.index})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary experience-update-${experienceStat.index} d-inline-block d-none|" href="#experienceAccordion" th:onclick="|restoreExperience(${experienceStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="trainingAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="trainingHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#trainingInfo" aria-expanded="false" aria-controls="trainingInfo">
+                            Professional Course/Training/Seminar
+                        </button>
+                    </h2>
+                    <div id="trainingInfo" class="accordion-collapse collapse" aria-labelledby="headingTraining" data-bs-parent="#trainingAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-7 offset-5 text-end manage-training-button d-block">
+                                    <a class="link-primary" href="#trainingAccordion" onclick="addTrainingRow()">
+                                        Manage Training Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${trainingInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="trainingTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-2">Course/Training</th>
+                                    <th scope="col" class="col-3">Contents</th>
+                                    <th scope="col" class="col-1">Duration</th>
+                                    <th scope="col" class="col-1">Completed Year</th>
+                                    <th scope="col" class="col-2">Certification</th>
+                                    <th scope="col" class="col-2">Comments</th>
+                                    <th scope="col" class="col-1">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="training : ${trainingInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext training-view-${trainingStat.index} d-block|" th:text="${training.courseName}"></label>
+                                        <input type="hidden" th:id="|trainingId_${trainingStat.index}|" th:value="${training.id}">
+                                        <input type="text" th:id="|courseName_${trainingStat.index}|" th:class="|form-control training-update-${trainingStat.index} d-none|" th:value="${training.courseName}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext text-break training-view-${trainingStat.index} d-block|" th:text="${training.contents}"></label>
+                                        <input type="text" th:id="|contents_${trainingStat.index}|" th:class="|form-control text-break training-update-${trainingStat.index} d-none|" th:value="${training.contents}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext training-view-${trainingStat.index} d-block|" th:text="${training.duration}"></label>
+                                        <input type="text" th:id="|trainingDuration_${trainingStat.index}|" th:class="|form-control training-update-${trainingStat.index} d-none|" th:value="${training.duration}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext training-view-${trainingStat.index} d-block|" th:text="${training.completedYear}"></label>
+                                        <input type="text" th:id="|completedYear_${trainingStat.index}|" th:class="|form-control training-update-${trainingStat.index} d-none|" th:value="${training.completedYear}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext training-view-${trainingStat.index} d-block|" th:text="${training.certification}"></label>
+                                        <input type="text" th:id="|certification_${trainingStat.index}|" th:class="|form-control training-update-${trainingStat.index} d-none|" th:value="${training.certification}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext training-view-${trainingStat.index} d-block|" th:text="${training.comments}"></label>
+                                        <input type="text" th:id="|trainingComments_${trainingStat.index}|" th:class="|form-control training-update-${trainingStat.index} d-none|" th:value="${training.comments}">
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary training-view-${trainingStat.index} d-inline-block d-block|" href="#trainingAccordion" th:onclick="|editTraining(${trainingStat.index})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary training-update-${trainingStat.index} d-inline-block d-none|" href="#trainingAccordion" th:onclick="|putTraining(${trainingStat.index})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary training-view-${trainingStat.index} d-inline-block d-block|" href="#trainingAccordion" th:onclick="|deleteTraining(${trainingStat.index})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary training-update-${trainingStat.index} d-inline-block d-none|" href="#trainingAccordion" th:onclick="|restoreTraining(${trainingStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="extraQualificationAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="curricularHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#curricularInfo" aria-expanded="false" aria-controls="curricularInfo">
+                            Extra Curricular Activities
+                        </button>
+                    </h2>
+                    <div id="curricularInfo" class="accordion-collapse collapse" aria-labelledby="headingCurricular" data-bs-parent="#extraQualificationAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-7 offset-5 text-end manage-qualification-button d-block">
+                                    <a class="link-primary" href="#trainingAccordion" onclick="addExtraQualificationRow()">
+                                        Manage Extra Curricular Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${extraCurricularInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="extraQualificationTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-11">Description</th>
+                                    <th scope="col" class="col-1">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="extraQualification : ${extraQualificationInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext extraQualification-view-${extraQualificationStat.index} d-block|" th:text="${extraQualification.description}"></label>
+                                        <input type="hidden" th:id="|extraQualificationId_${extraQualificationStat.index}|" th:value="${extraQualification.id}">
+                                        <input type="text" th:id="|eqDescription_${extraQualificationStat.index}|" th:class="|form-control extraQualification-update-${extraQualificationStat.index} d-none|" th:value="${extraQualification.description}">
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary extraQualification-view-${extraQualificationStat.index} d-inline-block d-block|" href="#extraQualificationAccordion" th:onclick="|editExtraQualification(${extraQualificationStat.index})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary extraQualification-update-${extraQualificationStat.index} d-inline-block d-none|" href="#extraQualificationAccordion" th:onclick="|putExtraQualification(${extraQualificationStat.index})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary extraQualification-view-${extraQualificationStat.index} d-inline-block d-block|" href="#extraQualificationAccordion" th:onclick="|deleteExtraQualification(${extraQualificationStat.index})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary extraQualification-update-${extraQualificationStat.index} d-inline-block d-none|" href="#extraQualificationAccordion" th:onclick="|restoreExtraQualification(${extraQualificationStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="languageAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="languageHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#languageInfo" aria-expanded="false" aria-controls="languageInfo">
+                            Language Skill
+                        </button>
+                    </h2>
+                    <div id="languageInfo" class="accordion-collapse collapse" aria-labelledby="headingLanguage" data-bs-parent="#languageAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-7 offset-5 text-end manage-language-button d-block">
+                                    <a class="link-primary" href="#languageAccordion" onclick="addLanguageRow()">
+                                        Manage Language Skill Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${languageSkillInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="languageTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-4">Language Name</th>
+                                    <th scope="col" class="col-7">Description</th>
+                                    <th scope="col" class="col-1">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="language : ${langSkillInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext language-view-${languageStat.index} d-block|" th:text="${language.languageName}"></label>
+                                        <input type="hidden" th:id="|languageId_${languageStat.index}|" th:value="${language.id}">
+                                        <input type="text" th:id="|languageName_${languageStat.index}|" th:class="|form-control language-update-${languageStat.index} d-none|" th:value="${language.languageName}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext language-view-${languageStat.index} d-block|" th:text="${language.description}"></label>
+                                        <input type="text" th:id="|langDescription_${languageStat.index}|" th:class="|form-control language-update-${languageStat.index} d-none|" th:value="${language.description}">
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary language-view-${languageStat.index} d-inline-block d-block|" href="#languageAccordion" th:onclick="|editLanguage(${languageStat.index})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary language-update-${languageStat.index} d-inline-block d-none|" href="#languageAccordion" th:onclick="|putLanguage(${languageStat.index})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary language-view-${languageStat.index} d-inline-block d-block|" href="#languageAccordion" th:onclick="|deleteLanguage(${languageStat.index})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary language-update-${languageStat.index} d-inline-block d-none|" href="#languageAccordion" th:onclick="|restoreLanguage(${languageStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="familyAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="familyHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#familyInfo" aria-expanded="false" aria-controls="familyInfo">
+                            Family Information
+                        </button>
+                    </h2>
+                    <div id="familyInfo" class="accordion-collapse collapse" aria-labelledby="headingFamily" data-bs-parent="#familyAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-7 offset-5 text-end manage-family-button d-block">
+                                    <a class="link-primary" href="#familyAccordion" onclick="addFamilyRow()">
+                                        Manage Family Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${familyInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="familyTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-3">Name</th>
+                                    <th scope="col" class="col-2">Relation</th>
+                                    <th scope="col" class="col-2">Birthday</th>
+                                    <th scope="col" class="col-2">Phone</th>
+                                    <th scope="col" class="col-2">Comments</th>
+                                    <th scope="col" class="col-1">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="family : ${familyInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext family-view-${familyStat.index} d-block|" th:text="${family.name}"></label>
+                                        <input type="hidden" th:id="|familyId_${familyStat.index}|" th:value="${family.id}">
+                                        <input type="text" th:id="|fName_${familyStat.index}|" th:class="|form-control family-update-${familyStat.index} d-none|" th:value="${family.name}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext family-view-${familyStat.index} d-block|" th:text="${family.relation}"></label>
+                                        <input type="text" th:id="|fRelation_${familyStat.index}|" th:class="|form-control family-update-${familyStat.index} d-none|" th:value="${family.relation}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext family-view-${familyStat.index} d-block|" th:text="${#temporals.format(family.birthDate, 'dd/MM/yyyy')}"></label>
+                                        <input type="text" th:id="|fBirthDate_${familyStat.index}|" th:class="|form-control family-update-${familyStat.index} d-none|" th:value="${family.birthDate}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext family-view-${familyStat.index} d-block|" th:text="${family.phone}"></label>
+                                        <input type="text" th:id="|fPhone_${familyStat.index}|" th:class="|form-control family-update-${familyStat.index} d-none|" th:value="${family.phone}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext family-view-${familyStat.index} d-block|" th:text="${family.comments}"></label>
+                                        <input type="text" th:id="|fComments_${familyStat.index}|" th:class="|form-control family-update-${familyStat.index} d-none|" th:value="${family.comments}">
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary family-view-${familyStat.index} d-inline-block d-block|" href="#familyAccordion" th:onclick="|editFamily(${familyStat.index})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary family-update-${familyStat.index} d-inline-block d-none|" href="#familyAccordion" th:onclick="|putFamily(${familyStat.index})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary family-view-${familyStat.index} d-inline-block d-block|" href="#familyAccordion" th:onclick="|deleteFamily(${familyStat.index})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary family-update-${familyStat.index} d-inline-block d-none|" href="#familyAccordion" th:onclick="|restoreFamily(${familyStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion mb-1" id="punishmentAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="punishmentHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#punishmentInfo" aria-expanded="false" aria-controls="punishmentInfo">
+                            Show Cause & Punishment
+                        </button>
+                    </h2>
+                    <div id="punishmentInfo" class="accordion-collapse collapse" aria-labelledby="headingPunishment" data-bs-parent="#punishmentAccordion">
+                        <div class="accordion-body">
+                            <div class="row row-cols-2">
+                                <div class="col-7 offset-5 text-end manage-punishment-button d-block">
+                                    <a class="link-primary" href="#punishmentAccordion" onclick="addPunishmentRow()">
+                                        Manage Show Cause Info
+                                    </a>
+                                    <a class="link-primary ms-3" th:href="@{${punishmentInfoChangeHistoryUrl}}" target="_blank">
+                                        Change History
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table-bordered table-hover text-center w-100" id="punishmentTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="col-6" colspan="2">Show Cause</th>
+                                    <th scope="col" class="col-5" colspan="2">Action</th>
+                                    <th scope="col" class="col-1" rowspan="2">Update/Delete</th>
+                                </tr>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="punishment : ${punishmentInfoList}">
+                                    <td>
+                                        <label th:class="|form-control-plaintext punishment-view-${punishmentStat.index} d-block|" th:text="${#temporals.format(punishment.showCauseDate, 'dd/MM/yyyy')}"></label>
+                                        <input type="hidden" th:id="|punishmentId_${punishmentStat.index}|" th:value="${punishment.id}">
+                                        <input type="text" th:id="|showCauseDate_${punishmentStat.index}|" th:class="|form-control punishment-update-${punishmentStat.index} d-none|" th:value="${punishment.showCauseDate}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext punishment-view-${punishmentStat.index} d-block|" th:text="${punishment.showCauseDescription}"></label>
+                                        <input type="text" th:id="|showCauseDescription_${punishmentStat.index}|" th:class="|form-control punishment-update-${punishmentStat.index} d-none|" th:value="${punishment.showCauseDescription}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext punishment-view-${punishmentStat.index} d-block|" th:text="${punishment.actionDate}"></label>
+                                        <input type="text" th:id="|actionDate_${punishmentStat.index}|" th:class="|form-control punishment-update-${punishmentStat.index} d-none|" th:value="${#temporals.format(punishment.actionDate,'dd/MM/yyyy')}">
+                                    </td>
+                                    <td>
+                                        <label th:class="|form-control-plaintext punishment-view-${punishmentStat.index} d-block|" th:text="${punishment.actionDescription}"></label>
+                                        <input type="text" th:id="|actionDescription_${punishmentStat.index}|" th:class="|form-control punishment-update-${punishmentStat.index} d-none|" th:value="${punishment.actionDescription}">
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <a th:class="|link-primary punishment-view-${punishmentStat.index} d-inline-block d-block|" href="#punishmentAccordion" th:onclick="|editPunishment(${punishmentStat.index})|">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a th:class="|link-primary punishment-update-${punishmentStat.index} d-inline-block d-none|" href="#punishmentAccordion" th:onclick="|putPunishment(${punishmentStat.index})|">
+                                                <i class="bi bi-check2-square"></i>
+                                            </a>
+                                            <span>&nbsp;&nbsp; | &nbsp;&nbsp;</span>
+                                            <a th:class="|link-primary punishment-view-${punishmentStat.index} d-inline-block d-block|" href="#punishmentAccordion" th:onclick="|deletePunishment(${punishmentStat.index})|">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a th:class="|link-primary punishment-update-${punishmentStat.index} d-inline-block d-none|" href="#punishmentAccordion" th:onclick="|restorePunishment(${punishmentStat.index})|">
+                                                <i class="bi bi-x-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="imageModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="imageModalLabel">Upload Image</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img th:id="modalImageOld" th:src="@{#}" th:if="${employee.imagePath}" th:high="130" th:width="120"/>
+                        <img th:id="modalImageNew" th:src="@{/resources/img/no_image.jpeg}" th:unless="${employee.imagePath}" th:high="130" th:width="120"/>
+                        <img th:id="newImageData" th:src="@{#}" class="avatar" th:high="130" th:width="120"/>
+                        <br>
+                        <br>
+                        <input class="form-control" id="modalImg" type="file" onchange="convertImgToBase64(event)">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="uploadImage()">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-1">
+            <div class="col-md-6 text-start" >
+                <button type="submit" class="btn btn-primary btn-value" name="action" onclick="setButtonValue(this)" value="save" th:if="${employee.id eq null or employee.id eq 0}">Save</button>
+                <button type="submit" class="btn btn-primary ms-1 btn-value" name="action" onclick="setButtonValue(this)" value="submit" th:if="${employee.id gt 0 and employee.stage < 1}">Submit</button>
+                <button type="submit" class="btn btn-primary btn-value" name="action" onclick="setButtonValue(this)" value="update" th:if="${employee.id gt 0}">Update</button>
+            </div>
+            <div class="col-md-6 text-end" >
+                <a class="btn btn-outline-secondary" th:href="@{${employeeProfileUrl}}"  th:if="${employee.id gt 0}">Profile</a>
+                <a class="btn btn-outline-secondary" th:href="@{${allChangeHistoryUrl}}" th:if="${employee.id gt 0}" target="_blank">Change History</a>
+            </div>
+        </div>
+    </form>
+
+    <th:block th:replace="common/toast.html :: toast"/>
+
+    <script th:inline="javascript">
+        const employeeCheckUrl = /*[[${T(bd.org.quantum.hrm.common.Routes).EMPLOYEE_CHECK}]]*/ "/employee/{memberId}/check"
+        const empUpdateUrl = /*[[${T(bd.org.quantum.hrm.common.Routes).UPDATE_EMPLOYEE}]]*/ "/update-employee"
+        const statusMap = /*[[${empStatusMap}]]*/ null
+        const designationMap = /*[[${designationMap}]]*/ null
+        const branchList = /*[[${branchList}]]*/ null
+        const departmentList = /*[[${departmentList}]]*/ null
+        const typeMap = /*[[${typeMap}]]*/ null
+
+        function setButtonValue(btn) {
+            document.querySelector('.btn-value').value = btn.textContent.toLowerCase()
+        }
+
+        function renderMember(searchKey, member) {
+            return `
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div>${member.nameEn} - ${member.registrationCode}</div>
+                        <div>${member.nameBn !== null && member.nameBn.length > 3 ? member.nameBn + ', ' : ''}${member.primaryPhone}</div>
+                    </div>
+                </div>
+            `
+        }
+
+        function selectMember(searchInput, member) {
+            const rowId = document.getElementById('rowId').value
+            const checkUrl = employeeCheckUrl.replace('{memberId}', member.id)
+            getApi(checkUrl).then(result => {
+                if (result !== null && result.id > 0 && rowId === '') {
+                    window.location.href = empUpdateUrl + '?id=' + result.id
+                } else {
+                    document.getElementById('member').value = member.id
+                    document.getElementById('nameEn').value = member.nameEn
+                    document.getElementById('nameBn').value = member.nameBn
+                    // document.getElementById('dateOfBirth').value = member.dateOfBirth
+                    document.getElementById('fathersName').value = member.fathersName
+                    document.getElementById('mothersName').value = member.mothersName
+                    document.getElementById('maritalStatus').value = member.maritalStatus
+                    // document.getElementById('dateOfMarriage').value = member.dateOfMarriage
+                    document.getElementById('spouseName').value = member.spouseName
+                    document.getElementById('gender').value = member.gender
+                    document.getElementById('religion').value = member.religion
+                    document.getElementById('regCode').value = member.registrationCode
+                    document.getElementById('bloodGroup').value = member.bloodGroup
+                    document.getElementById('nationalId').value = member.nationalId
+                    document.getElementById('mailingAddress').value = member.presentAddress
+                    document.getElementById('permanentAddress').value = member.permanentAddress
+                    document.getElementById('primaryPhone').value = member.primaryPhone
+                    document.getElementById('primaryEmail').value = member.primaryEmail
+                    document.getElementById('secondaryPhone').value = member.secondaryPhone
+                    document.getElementById('secondaryEmail').value = member.secondaryEmail
+                    document.getElementById('memberType').value = member.memberType
+                    document.getElementById('presentDistrict').value = member.presentDistrict
+                    document.getElementById('presentThana').value = member.presentThana
+                    document.getElementById('presentUnion').value = member.presentUnion
+
+                    if (member.dateOfBirth !== undefined && member.dateOfBirth !== null && member.dateOfBirth.split('/').length === 3) {
+                        const [day, month, year] = member.dateOfBirth.split('/')
+                        document.getElementById('dateOfBirth').value = `${day.padStart(2,0)}/${month.padStart(2,0)}/${year}`
+                    }
+
+                    if (member.dateOfMarriage !== undefined && member.dateOfMarriage !== null && member.dateOfMarriage.split('/').length === 3) {
+                        const [day, month, year] = member.dateOfMarriage.split('/')
+                        document.getElementById('dateOfMarriage').value = `${day.padStart(2,0)}/${month.padStart(2,0)}/${year}`
+                    }
+                }
+            })
+        }
+
+        function clearMember() {
+            document.getElementById('member').value = ''
+            document.getElementById('nameEn').value = ''
+            document.getElementById('nameBn').value = ''
+            document.getElementById('dateOfBirth').value = ''
+            document.getElementById('fathersName').value = ''
+            document.getElementById('mothersName').value = ''
+            document.getElementById('maritalStatus').value = ''
+            document.getElementById('dateOfMarriage').value = ''
+            document.getElementById('spouseName').value = ''
+            document.getElementById('gender').value = ''
+            document.getElementById('religion').value = ''
+            document.getElementById('regCode').value = ''
+            document.getElementById('bloodGroup').value = ''
+            document.getElementById('nationalId').value = ''
+            document.getElementById('mailingAddress').value = ''
+            document.getElementById('permanentAddress').value = ''
+            document.getElementById('primaryPhone').value = ''
+            document.getElementById('primaryEmail').value = ''
+            document.getElementById('secondaryPhone').value = ''
+            document.getElementById('secondaryEmail').value = ''
+            document.getElementById('memberType').value = ''
+            document.getElementById('presentDistrict').value = ''
+            document.getElementById('presentThana').value = ''
+            document.getElementById('presentUnion').value = ''
+            const searchEl = document.querySelector('.member-search')
+            searchEl.value = ''
+            searchEl.focus()
+        }
+
+        function setBranchName(el) {
+            const options = el.options
+            const selectedOption = options[options.selectedIndex]
+            document.getElementById('branchName').value = selectedOption.textContent
+            loadDepartment()
+        }
+
+        function loadDepartment(deptId = 0) {
+            const branchId = document.getElementById('branch').value
+            const url = `/department-list/${branchId}`
+            const deptIdElement = document.getElementById('department')
+
+            const options = []
+            options.push(`<option value='0'></option>`)
+
+            if (branchId !== undefined && branchId !== '0') {
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.map(dept => options.push(`<option value='${dept.id}' ${dept.id == deptId ? 'selected' : ''} >${dept.name}</option>`))
+                        deptIdElement.innerHTML = options.join('')
+                    })
+                    .catch(error => {
+                        console.error('Error fetching department list:', error)
+                    });
+            }
+        }
+
+        function loadTransferDepartment(index, val, fromTo = 'from') {
+            const branchId = document.querySelector(`.branch-${fromTo}-${index}`).value
+            const url = `/department-list/${branchId}`
+            const deptIdElement = document.querySelector(`.department-${fromTo}-${index}`)
+            const deptValue = val
+
+            const options = []
+            options.push(`<option value='0'></option>`)
+
+            if (branchId !== undefined && branchId !== '0') {
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.map(dept => options.push(`<option value='${dept.id}' ${dept.id === deptValue ? 'selected' : ''}>${dept.name}</option>`))
+                        deptIdElement.innerHTML = options.join('')
+                    })
+                    .catch(error => {
+                        console.error('Error fetching department list:', error)
+                    });
+            }
+        }
+
+        function loadPreJoinDepartment(index, val) {
+            const branchId = document.querySelector(`.preJoin-branch-${index}`).value
+            const url = `/department-list/${branchId}`
+            const deptIdElement = document.querySelector(`.preJoin-dept-${index}`)
+            const deptValue = val
+
+            const options = []
+            options.push(`<option value='0'></option>`)
+
+            if (branchId !== undefined && branchId !== '0') {
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.map(dept => options.push(`<option value='${dept.id}' ${dept.id === deptValue ? 'selected' : ''}>${dept.name}</option>`))
+                        deptIdElement.innerHTML = options.join('')
+                    })
+                    .catch(error => {
+                        console.error('Error fetching department list:', error)
+                    });
+            }
+        }
+
+        function loadKhedmotDepartment(index, val) {
+            const branchId = document.querySelector(`.khedmot-branch-${index}`).value
+            const url = `/department-list/${branchId}`
+            const deptIdElement = document.querySelector(`.khedmot-dept-${index}`)
+            const deptValue = val
+
+            const options = []
+            options.push(`<option value='0'></option>`)
+
+            if (branchId !== undefined && branchId !== '0') {
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.map(dept => options.push(`<option value='${dept.id}' ${dept.id === deptValue ? 'selected' : ''}>${dept.name}</option>`))
+                        deptIdElement.innerHTML = options.join('')
+                    })
+                    .catch(error => {
+                        console.error('Error fetching department list:', error)
+                    });
+            }
+        }
+
+        function setDepartmentName() {
+            const deptEl = document.getElementById('department')
+            const options = deptEl.options
+            const selectedOption = options[options.selectedIndex]
+            document.getElementById('departmentName').value = selectedOption.textContent
+        }
+
+        function setDesignationName(el) {
+            const options = el.options
+            const selectedOption = options[options.selectedIndex]
+            document.getElementById('designationName').value = selectedOption.textContent
+        }
+
+        function convertImgToBase64(event) {
+            let file = event.target.files[0]
+            getBase64(file).then(data => {
+                document.getElementById('newImageData').src = data
+            })
+        }
+
+        function uploadImage() {
+            let image = {}
+            const id = document.getElementById('rowId').value
+            const imageData = document.getElementById('newImageData').src
+            image.objId = id
+            image.data = imageData
+            image.folder = 'images'
+            image.name = id + '_' + Date.now()
+
+            let url = '/employee/image/upload'
+
+            postForJson(url, image).then(response => {
+                if(response){
+                    const path = /*[[${employee.imagePath}]]*/ ''
+
+                    if (path) {
+                        document.getElementById('formImageOld').src = response.data
+                    } else {
+                        document.getElementById('formImageNew').src = response.data
+                    }
+                    document.getElementById('imagePath').value = response.path
+                }
+            }).catch((error) => {
+                console.error(error)
+            })
+
+            new BSN.Modal('#imageModal').hide()
+        }
+
+        function getBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader()
+                reader.readAsDataURL(file)
+                reader.onload = () => resolve(reader.result)
+                reader.onerror = error => reject(error)
+            })
+        }
+
+        function searchBranch(event) {
+            if (event.target.value.length >= 3) {
+                const searchTerm = event.target.value.toLowerCase();
+                const filteredBranches = branchList.filter(branch =>
+                    branch.name.toLowerCase().includes(searchTerm)
+                );
+
+                displaySearchResults(filteredBranches);
+            }
+        }
+
+        function displaySearchResults(branches) {
+            const searchResults = document.getElementById('searchResults')
+            searchResults.innerHTML = ''
+
+            branches.forEach(branch => {
+                const option = document.createElement('div')
+                option.classList.add('dropdown-item')
+                option.classList.add('text-primary')
+                option.textContent = `${branch.name}`
+                option.addEventListener('click', () => selectBranch(branch))
+                searchResults.appendChild(option)
+            });
+
+            searchResults.style.display = branches.length > 0 ? 'block' : 'none'
+        }
+
+        function selectBranch(branch) {
+            document.getElementById('branch').value = branch.id
+            document.getElementById('branchName').value = branch.name
+            document.getElementById('searchResults').style.display = 'none'
+            document.getElementById('branchSearch').value = ''
+        }
+
+        function searchDepartment(event) {
+            if (event.target.value.length >= 3) {
+                const searchTerm = event.target.value.toLowerCase()
+                const filteredDepts = departmentList.filter(dept =>
+                    dept.name.toLowerCase().includes(searchTerm)
+                )
+
+                displaySearchResultsForDept(filteredDepts)
+            }
+        }
+
+        function displaySearchResultsForDept(depts) {
+            const searchResults = document.getElementById('deptSearchResults')
+            searchResults.innerHTML = ''
+
+            depts.forEach(dept => {
+                const option = document.createElement('div')
+                option.classList.add('dropdown-item')
+                option.classList.add('text-primary')
+                option.textContent = `${dept.name}`
+                option.addEventListener('click', () => selectDept(dept))
+                searchResults.appendChild(option)
+            })
+
+            searchResults.style.display = depts.length > 0 ? 'block' : 'none'
+        }
+
+        function selectDept(dept) {
+            document.getElementById('department').value = dept.id
+            document.getElementById('departmentName').value = dept.name
+            document.getElementById('deptSearchResults').style.display = 'none'
+            document.getElementById('deptSearch').value = ''
+        }
+
+        function searchDesignation(event) {
+            if (event.target.value.length >= 3) {
+                const searchTerm = event.target.value.toLowerCase();
+                let filteredDesignation = []
+                Object.entries(designationMap).forEach((value, key) => {
+                    if (value[1].toLowerCase().includes(searchTerm)) {
+                        const obj = { id: value[0], name: value[1] }
+                        filteredDesignation.push(obj)
+                    }
+                })
+                displaySearchResultsForDesignation(filteredDesignation);
+            }
+        }
+
+        function displaySearchResultsForDesignation(designations) {
+            const searchResults = document.getElementById('designationSearchResults')
+            searchResults.innerHTML = ''
+
+            designations.forEach(designation => {
+                const option = document.createElement('div')
+                option.classList.add('dropdown-item')
+                option.classList.add('text-primary')
+                option.textContent = `${designation.name}`
+                option.addEventListener('click', () => selectDesignation(designation))
+                searchResults.appendChild(option)
+            })
+
+            searchResults.style.display = designations.length > 0 ? 'block' : 'none'
+        }
+
+        function selectDesignation(designation) {
+            document.getElementById('designation').value = designation.id
+            document.getElementById('designationName').value = designation.name
+            document.getElementById('designationSearchResults').style.display = 'none'
+            document.getElementById('designationSearch').value = ''
+        }
+
+        (() => {
+            const birthDate = document.getElementById('dateOfBirth')
+            applyDatepicker(birthDate, birthDate.value)
+
+            const marriageDate = document.getElementById('dateOfMarriage')
+            applyDatepicker(marriageDate, marriageDate.value)
+
+            const joinDate = document.getElementById('joiningDate')
+            applyDatepicker(joinDate, joinDate.value)
+
+            const matchMember = document.querySelectorAll(".member-search")
+
+            for (const el of matchMember) {
+                new AutoComplete(el, renderMember, selectMember)
+            }
+
+            const getImageUrl = '/employee/image/download'
+            const path = /*[[${employee.imagePath}]]*/ ''
+
+            if (path) {
+                fetch(generateRequestURL(getImageUrl, {path: path}))
+                    .then(response => response.json())
+                    .then(image => {
+                        document.getElementById('formImageOld').src = image.data
+                        document.getElementById('modalImageOld').src = image.data
+                    })
+            }
+        })()
+
+        const empDept = /*[[${employee.department}]]*/ null
+        loadDepartment(empDept)
+    </script>
+</div>
+</body>
+</html>

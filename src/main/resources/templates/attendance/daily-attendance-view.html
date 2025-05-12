@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+  <title>Bio Attendance</title>
+  <script type="text/javascript" th:src="@{/resources/js/papaparse.min.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/js/pdfmake.min.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/js/vfs_fonts.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/js/pdf-utils.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/js/report.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/vfs/noto-sans-english.js}"></script>
+  <script type="text/javascript" th:src="@{/resources/vfs/noto-sans-bengali.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="#{attendance}">home title</h4>
+<div layout:fragment="content">
+  <form method="post" th:action="@{${T(bd.org.quantum.hrm.common.Routes).DAILY_ATTENDANCE_VIEW}}" th:object="${criteria}">
+    <div class="row mb-3">
+      <div class="col-2 pe-0">
+        <input class="form-control" placeholder="DD/MM/YYYY" id="attendanceDate" th:field="*{attendanceDate}">
+      </div>
+      <div class="col-4 pe-0">
+        <select class="form-select" id="branchId" th:field="*{branch}">
+          <option value="0">Search by branch</option>
+          <option th:each="branch : ${branchList}" th:value="${branch.id}" th:text="${branch.name}"></option>
+        </select>
+      </div>
+      <div class="col-4 pe-0">
+        <div class="input-group">
+          <select class="form-select" id="deptId" th:field="*{department}"></select>
+          <input class="form-check-input ms-2" type="checkbox" value="true" id="includeDeptSub" th:field="*{includeDeptSub}">
+          <label class="form-check-label ps-2" for="includeDeptSub">
+            With Subsidiary
+          </label>
+        </div>
+      </div>
+      <div class="col-2 pe-0">
+        <button class="btn btn-primary" th:text="#{button.search}">Search</button>
+        <button type="button" class="btn btn-secondary" onclick="generatePdf()">PDF</button>
+      </div>
+    </div>
+  </form>
+  <div th:if="${summary != null}">
+    <h4 th:text="|Attendance Summary|"></h4>
+    <table class="table table-responsive table-bordered shadow mb-3">
+      <tbody>
+      <tr>
+        <th class="col-8" th:text="|Timely: |"></th>
+        <th class="col-4" th:text="${summary.timely}"></th>
+      </tr>
+      <tr>
+        <th class="col-8" th:text="|Delay: |"></th>
+        <th class="col-4" th:text="${summary.delay}"></th>
+      </tr>
+      <tr>
+        <th class="col-8" th:text="|Movement: |"></th>
+        <th class="col-4" th:text="${summary.movement}"></th>
+      </tr>
+      <tr>
+        <th class="col-8" th:text="|Leave: |"></th>
+        <th class="col-4" th:text="${summary.leave}"></th>
+      </tr>
+      <tr>
+        <th class="col-8" th:text="|Absent: |"></th>
+        <th class="col-4" th:text="${summary.absent}"></th>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div th:if="${detailsMap != null && #lists.size(detailsMap) > 0}">
+    <th:block th:each="map: ${detailsMap}">
+      <h4 th:text="${map.key}"></h4>
+      <table class="table table-responsive table-bordered shadow mb-3">
+        <thead>
+        <tr>
+          <th scope="col" class="col-6 text-center">Name</th>
+          <th th:if="${map.key ne 'Absent'}" scope="col" class="col-3 text-center" th:text="${(map.key eq 'Movement' or map.key eq 'Leave') ? 'From' : 'In Time'}">In Time</th>
+          <th th:if="${map.key ne 'Absent'}" scope="col" class="col-3 text-center" th:text="${(map.key eq 'Movement' or map.key eq 'Leave') ? 'To' : 'Out Time'}">Out Time</th>
+        </tr>
+        </thead>
+        <tbody>
+        <th:block  th:each="item : ${map.value}">
+          <tr th:style="${item.name eq 'Total'? 'font-weight: bold;' : ''}">
+            <td th:if="${map.key ne 'Absent' or item.name ne 'Total'}" th:text="${item.name}"></td>
+            <td th:if="${map.key ne 'Absent'}" th:text="${item.inTime}"></td>
+            <td th:if="${map.key ne 'Absent'}" th:text="${item.outTime}"></td>
+          </tr>
+        </th:block>
+        </tbody>
+      </table>
+    </th:block>
+  </div>
+</div>
+<th:block layout:fragment="script">
+  <script th:inline="javascript">
+    document.getElementById('branchId').addEventListener('change', loadDepartment)
+
+    function loadDepartment() {
+      const branchId = document.getElementById('branchId').value
+      const url = `/department-list/${branchId}`
+      const deptIdElement = document.getElementById('deptId')
+      const deptId = /*[[${criteria.department}]]*/ null
+
+      const deptList = /*[[${departmentList}]]*/ null
+      const user = /*[[${loggedInUser}]]*/ null
+      const options = []
+      options.push(`<option value='0'>Search by department</option>`)
+
+      if (branchId !== undefined && branchId !== '0') {
+        fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                  data.map(dept => options.push(`<option value='${dept.id}' ${dept.id == deptId ? 'selected' : ''}>${dept.name}</option>`))
+                  deptIdElement.innerHTML = options.join('')
+                })
+                .catch(error => {
+                  console.error('Error fetching department list:', error)
+                });
+
+      } else if (deptList !== null) {
+        deptList.map(dept => options.push(`<option value='${dept.id}'>${dept.name}</option>`))
+        deptIdElement.innerHTML = options.join('')
+
+      } else if (user.departmentId !== null && user.departmentId > 0 && user.departmentName !== null && user.departmentName !== '') {
+        options.push(`<option value='${user.departmentId}'>${user.departmentName}</option>`)
+        deptIdElement.innerHTML = options.join('')
+
+      } else {
+        options.push(``)
+        deptIdElement.innerHTML = options.join('')
+      }
+    }
+
+    function generatePdf() {
+      const loggedInUser = /*[[${loggedInUser}]]*/ null
+      const dateEl = document.querySelector('#attendanceDate')
+      const branchEl = document.querySelector('#branchId')
+      const deptEl = document.querySelector('#deptId')
+      const deptSub = document.querySelector('#includeDeptSub')
+
+      const attendance = {
+        attendanceDate: dateEl.value,
+        branch: branchEl.value,
+        branchName: branchEl.selectedIndex < 0 ? loggedInUser.branchName : branchEl.options[branchEl.selectedIndex].text,
+        department: deptEl.value,
+        departmentName: deptEl.selectedIndex < 0 ? loggedInUser.departmentName : deptEl.options[deptEl.selectedIndex].text,
+        includeDeptSub: deptSub.value,
+      }
+
+      const url = '/daily-attendance-view?format=PDF'
+      postForJson(url, attendance).then(response => {
+        generateDailyAttendanceViewPdf(response)
+      })
+    }
+
+    (() => {
+      const attendanceDate = document.getElementById('attendanceDate')
+      applyDatepicker(attendanceDate, attendanceDate.value)
+    })()
+
+    loadDepartment()
+  </script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,22 @@
+package bd.org.quantum.hrm.employee;
+
+import bd.org.quantum.hrm.common.AuditData;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "language_skill_info")
+public class LanguageSkillInfo extends AuditData {
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "employee")
+    private Employee employee;
+
+    private String languageName;
+
+    @Column(length = 1000)
+    private String description;
+}

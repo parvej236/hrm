@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="|Employee Profile|"></title>
+    <style>
+        .fixed-height-row, .fixed-height-row > div[class*='col-'] {
+            display: -webkit-box;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            flex:1 0 auto;
+        }
+    </style>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="#{employee.profile.title}">Profile</h4>
+<div class="container" id="content" layout:fragment="content">
+    <div class="row mb-2">
+        <div class="col-md-3 text-start">
+            <img th:id="formImageOld" th:src="@{#}" th:if="${employee.imagePath}" alt="available" style="width: 45mm; height: 55mm"/>
+            <img th:id="formImageMale"th:src="@{/resources/img/dummy_male.jpg}" class="img-thumbnail" th:if="${employee.gender eq 'Male' && employee.imagePath eq null}" style="width: 45mm; height: 55mm"/>
+            <img th:id="formImageFemale" th:src="@{/resources/img/dummy_female.jpg}" class="img-thumbnail" th:if="${employee.gender eq 'Female' && employee.imagePath eq null}" style="width: 45mm; height: 55mm"/>
+        </div>
+        <div class="col-md-9 text-start">
+            <div class="row mb-1">
+                <div class="fw-bolder" th:text="|${employee.nameEn + (employee.nameBn ne null and #strings.length(employee.nameBn) gt 2 ? ' (' + employee.nameBn + ')' : '')}|"></div>
+            </div>
+            <div class="row mb-1">
+                <div class="fw-bolder" th:text="${employee.designationName}"></div>
+            </div>
+            <div class="row mb-1">
+                <div th:if="${#lists.contains(tempEmpStatuses, employee.status) and employee.tempEmployeeId ne null}" class="fw-bold" th:text="${employee.tempEmployeeId}"></div>
+                <div th:if="${!#lists.contains(tempEmpStatuses, employee.status) and employee.employeeId ne null}"  class="fw-bold" th:text="|${#temporals.format(employee.hiring, 'yy')}${employee.employeeId}|"></div>
+            </div>
+            <div class="row mb-1">
+                <div class="fw-bold" th:text="|${employee.status} ${statuses ne null ? '(' + statuses + ')' : ''}|"></div>
+            </div>
+            <div class="row mb-1">
+                <div class="fw-bold" th:text="|${(employee.departmentName != null and employee.departmentName != '' ? employee.departmentName + ', ' : '') + employee.branchName}|"></div>
+            </div>
+            <div class="row mb-1" th:if="${employee.dateOfBirth ne null}">
+                <div class="fw-bold" th:text="|${#temporals.format(employee.dateOfBirth, 'dd/MM/yyyy')} (${age} Years)|"></div>
+            </div>
+            <div class="row mb-1">
+                <div class="col fw-bold" th:text="|${employee.primaryPhone + ', ' + employee.secondaryPhone}|"></div>
+                <div class="col fw-bold" th:text="${employee.primaryEmail}"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-2 fixed-height-row">
+        <div class="row col-6">
+            <div class="row">
+                <label class="col-4 form-label">Father's Name: </label>
+                <div class="col-8" th:text="${employee.fathersName}"></div>
+            </div>
+            <div class="row">
+                <label class="col-4 form-label">Mother's Name: </label>
+                <div class="col-8" th:text="${employee.mothersName}"></div>
+            </div>
+            <div class="row">
+                <label class="col-4 form-label">Spouse's Name: </label>
+                <div class="col-8" th:text="${employee.spouseName}"></div>
+            </div>
+            <div class="row">
+                <label class="col-4 form-label">Marital Status: </label>
+                <div class="col-8" th:text="|${employee.maritalStatus + ' (' + employee.dateOfMarriage + ')'}|"></div>
+            </div>
+            <div class="row">
+                <label class="col-4 form-label">Present Address: </label>
+                <div class="col-8" th:text="${employee.presentAddress}"></div>
+            </div>
+            <div class="row">
+                <label class="col-4 form-label">Responsibility: </label>
+                <div class="col-8" th:text="${employee.responsibility}"></div>
+            </div>
+        </div>
+        <div class="row col-6">
+            <div class="row">
+                <label class="col-4 form-label">NID: </label>
+                <div class="col-8" th:text="${employee.nationalId}"></div>
+            </div>
+            <div class="row">
+                <label class="col-4 form-label">Gender: </label>
+                <div class="col-8" th:text="${employee.gender}"></div>
+            </div>
+            <div class="row">
+                <label class="col-4 form-label">Religion: </label>
+                <div class="col-8" th:text="${employee.religion}"></div>
+            </div>
+            <div class="row">
+                <label class="col-4 form-label">Blood Group: </label>
+                <div class="col-8" th:text="${employee.bloodGroup}"></div>
+            </div>
+            <div class="row">
+                <label class="col-4 form-label">Permanent Address: </label>
+                <div class="col-8" th:text="${employee.permanentAddress}"></div>
+            </div>
+            <div class="row">
+                <label class="col-4 form-label">Remarks: </label>
+                <div class="col-8" th:text="${employee.remarks}"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-1">
+        <div class="col-md-4 text-start" >
+            <a href="#" class="btn btn-primary" th:href="@{${updateUrl}}">Update</a>
+        </div>
+        <div class="col-md-8 text-end" >
+            <a class="btn btn-outline-secondary" th:href="${attDetailsUrl}" target="_blank">Attendance Details</a>
+            <a class="btn btn-outline-secondary" th:href="${detailsUrl}" target="_blank">More Information</a>
+            <a class="btn btn-outline-secondary" th:href="${memberProfileUrl+employee.member}"  target="_blank">Member Profile</a>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        (() => {
+            const getImageUrl = '/employee/image/download'
+            const path = /*[[${employee.imagePath}]]*/ ''
+
+            if (path) {
+                fetch(generateRequestURL(getImageUrl, {path: path}))
+                    .then(response => response.json())
+                    .then(image => {
+                        document.getElementById('formImageOld').src = image.data
+                    })
+            }
+        })()
+    </script>
+</div>
+</body>
+</html>

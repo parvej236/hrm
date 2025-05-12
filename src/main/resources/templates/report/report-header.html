@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Report Header</title>
+</head>
+<body>
+<div th:fragment="header">
+    <div class="row">
+        <div class="col text-start">
+            <h2>Quantum Foundation</h2>
+            <h5>Kendro</h5>
+        </div>
+        <div class="col text-end">
+            <h4 th:text="*{reportData.header.title}"></h4>
+            <h6 th:text="*{reportData.header.duration}"></h6>
+            <h6 th:text="*{reportData.header.subTitle}"></h6>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="notfound">
+    <div class="mt-5" th:unless="${reportData.result != null && #lists.size(reportData.result) > 0}">
+        <h3 align="center" class="text-danger">Nothing Found to Display</h3>
+    </div>
+</div>
+</body>
+</html>

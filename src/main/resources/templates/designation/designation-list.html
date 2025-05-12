@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+    <h4 layout:fragment="content-header" th:text="${formTitle}"></h4>
+
+</head>
+<body>
+<th:block layout:fragment="content">
+
+    <table id='table' th:attr="data-url=${searchUrl}">
+        <thead>
+        <tr>
+            <th class="col-md-1" data-column-name='action' style="width:64px;">Action</th>
+            <th class="col-md-3" data-column-name='name'>Name</th>
+            <th class="col-md-3" data-column-name='sortingOrder' sortable="true">Sorting Order</th>
+            <th class="col-md-3" data-column-name='grade'>Grade</th>
+            <th class="col-md-3" data-column-name='status'>Status</th>
+        </tr>
+        </thead>
+    </table>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const table = new DataTable('#table', {
+            omniPlaceholder: "Designation Name",
+            sortColumn: "sortingOrder",
+            events: {
+                createNew: (e, rowData) => {
+                    window.location = /*[[${entryUrl}]]*/ '/designation-entry'
+                }
+            },
+            buttonSection: [
+            {
+                name: 'createNew',
+                label: 'Create New',
+                classes: 'bi-plus btn btn-primary'
+            }
+        ],
+            formatter: {
+                action: (el, column, rowData) => {
+                    const editUrl = /*[[${editUrl}]]*/ '/designation-update'
+                    el.innerHTML = `<a href="${editUrl}?id=${rowData.id}"
+                    id="editButton" class="btn btn-secondary btn-sm" type="button">Open</a>`
+                },
+                status:(el, column, rowData) => {
+                    if(rowData.status === 1){
+                        el.innerText = 'Active'
+                    }
+                    else{
+                        el.innerText = 'Inactive'
+                    }
+                },
+            }
+        })
+    </script>
+</th:block>
+</body>
+</html>

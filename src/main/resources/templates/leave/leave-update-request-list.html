@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <title>Leave List</title>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header">Leave Update Request List</h4>
+<th:block layout:fragment="content">
+    <div id="filterOptions" class="m-3">
+        <div class="row mb-2">
+            <div class="input-group px-0">
+                <input type="hidden" name="userId" id="requestedBy">
+                <input id="submitterSearch"
+                       class="form-control autocomplete user-search"
+                       placeholder="Search submitter by name, phone or reg. code"
+                       data-search-url="/users?userNameRegOrPhone=" autocomplete="off"
+                       aria-describedby="addon-for-search">
+                <span class="input-group-text" role="button" id="addon-for-search">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                <span class="input-group-text rounded-end" role="button" onclick="clearUser()">
+                                        Clear
+                                    </span>
+                <div class="invalid-feedback">
+                    <i class="bi bi-shield-exclamation"></i> Please type valid code.
+                </div>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <select class="form-select" name="stage">
+                <option value="">Select Stage</option>
+                <option value="Requested">Requested</option>
+                <option value="Authorized">Authorized</option>
+                <option value="Approved">Approved</option>
+            </select>
+        </div>
+    </div>
+    <table id='table' th:attr="data-url=${searchUrl}">
+        <thead>
+        <tr>
+            <th class="col-md-1" data-column-name='action'>Action</th>
+            <th class="col-md-3" data-column-name='name'>Name</th>
+            <th class="col-md-2" data-column-name='designation'>Designation</th>
+            <th class="col-md-1" data-column-name='branchDept'>Branch</th>
+            <th class="col-md-2" data-column-name='oldDates'>Old Range</th>
+            <th class="col-md-2" data-column-name='newDates'>New Range</th>
+        </tr>
+        </thead>
+    </table>
+</th:block>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const table = new DataTable('#table', {
+            omniPlaceholder: "Name or reg. code or employee id or phone",
+            filterEnabled: true,
+            filterSelector: "filterOptions",
+            formatter: {
+                action: (el, column, rowData) => {
+                    const entryUrl = /*[[${entryUrl}]]*/ '/leave-apply';
+                    el.innerHTML = `<a href="${entryUrl}?id=${rowData.id}"
+                    id="editButton" class="btn btn-secondary btn-sm" type="button">
+                    Open
+                    </a>`
+                },
+                branchDept: (el, column, rowData) => {
+                    el.innerText = `${rowData.branch} ${rowData.department !== null ?  (rowData.department) : ''}`
+                },
+                oldDates:(el, column, rowData) => {
+                    el.innerText = `${rowData.oldDateFrom.toLocaleString()} - ${rowData.oldDateTo.toLocaleString()}`
+                },
+                newDates:(el, column, rowData) => {
+                    el.innerText = `${rowData.dateFrom.toLocaleString()} - ${rowData.dateTo.toLocaleString()}`
+                }
+            }
+        })
+
+        function renderUser(searchKey, user) {
+            return `
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div>${user.name} - ${user.registrationNumber}</div>
+                        <div>${user.branchName} ${user.designation}</div>
+                    </div>
+                </div>
+            `
+        }
+
+        function selectUser(searchInput, user) {
+            document.getElementById('requestedBy').value = user.id
+            document.getElementsByClassName('user-search')[0].value = user.name
+        }
+
+        function clearUser() {
+            document.getElementById('requestedBy').value = ''
+            document.getElementsByClassName('user-search')[0].value = ''
+        }
+
+        (() => {
+            const matchUser = document.querySelectorAll(".user-search")
+
+            for (const el of matchUser) {
+                new AutoComplete(el, renderUser, selectUser)
+            }
+        })()
+    </script>
+</th:block>
+</body>
+</html>

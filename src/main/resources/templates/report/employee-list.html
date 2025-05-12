@@ -1,0 +1,64 @@
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/report}">
+<head>
+    <title>Employee List</title>
+    <style>
+        .container{
+            max-width: 1600px;
+            padding-left: 0rem !important;
+        }
+    </style>
+</head>
+<body>
+<div id="content" layout:fragment="content">
+    <div th:if="${reportData.result.data != null && #lists.size(reportData.result.data) > 0}">
+        <table style="width:100%">
+            <thead>
+            <tr>
+                <th>SL</th>
+                <th colspan="2">Primary Information</th>
+                <th>Status & Date</th>
+                <th th:if="${reportData.result.reportForPhone}">Phones</th>
+                <th th:unless="${reportData.result.reportForPhone}">Educational Qualification</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${reportData.result.data}">
+                <td th:text="${itemStat.count}"></td>
+                <td width="81px">
+                    <img th:src="${item.base64}" alt="picture" th:high="80" th:width="80">
+                </td>
+                <td>
+                    <span th:text="|${item.name} (${item.employeeId})|" class="fw-bold"></span><br/>
+                    <span th:text="|${item.regCode})|"></span><br/>
+                    <span th:text="${item.phone}"></span><br/>
+                    <span th:text="${item.designation}" class="fw-bold"></span><br/>
+                    <span th:text="|${item.branchName} - ${item.departmentName}|"></span>
+                </td>
+                <td>
+                    <span th:text="${item.status}" class="fw-bold text-decoration-underline"></span><br/>
+                    <span th:if="${item.joiningDate ne null}" th:text="|Joining: ${item.joiningDate}|"></span><br/>
+                    <span th:if="${item.regularDate ne null}" th:text="|Regular: ${item.regularDate}|"></span><br/>
+                    <span th:if="${item.promotionDate ne null}" th:text="|Promotion: ${item.promotionDate}|"></span>
+                </td>
+                <td th:if="${reportData.result.reportForPhone}">
+                    <span th:text="|Primary: ${item.primaryPhone}|" class="fw-bold"></span><br/>
+                    <span th:if="${item.secondaryPhone ne null}" th:text="|Secondary: ${item.secondaryPhone}|"></span><br/>
+                    <span th:if="${item.phoneOffice ne null}" th:text="|Office: ${item.phoneOffice}|"></span><br/>
+                    <span th:if="${item.phoneOthers ne null}" th:text="|Others: ${item.phoneOthers}|"></span>
+                </td>
+                <td th:unless="${reportData.result.reportForPhone}">
+                    <span th:text="${item.examName}" class="fw-bold"></span><br/>
+                    <span th:text="${item.subjectDepartment}"></span><br/>
+                    <span th:text="${item.institution}"></span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="report/report-header :: notfound"></div>
+</div>
+</body>
+</html>

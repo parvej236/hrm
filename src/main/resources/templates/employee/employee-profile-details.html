@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="|Employee Profile Details|"></title>
+    <style>
+        hr {
+            margin: 1rem 0;
+            color: inherit;
+            background-color: currentColor;
+            border: 0;
+            opacity: 0.25;
+        }
+    </style>
+</head>
+<body>
+<div class="row w-50" layout:fragment="content-header">
+    <div class="col-md-4 text-start">
+        <div>
+            <img th:src="@{#}" id="imageId" class="rounded" style="width: 20mm; height: 25mm" th:if="${employee.imagePath ne null}"/>
+            <img th:src="@{/resources/img/none.gif}" class="img-thumbnail" style="width: 20mm; height: 25mm" th:if="${employee.imagePath eq null}"/>
+        </div>
+    </div>
+    <div class="col-md-8 text-start">
+        <span class="fw-bold" th:text="${employee.nameEn}"></span><br />
+        <span class="fw-bold" th:text="${employee.designationName}"></span><br />
+        <span class="fw-bold" th:text="|${#temporals.format(employee.hiring, 'yy')}${employee.employeeId}|"></span><br />
+        <span class="fw-bold" th:text="|${employee.departmentName + (employee.departmentName != null and employee.departmentName != '' ? ', ' : '') + employee.branchName}|"></span>
+    </div>
+</div>
+<div id="content" layout:fragment="content">
+    <div class="row mb-2" th:if="${statusInfoList != null && #lists.size(statusInfoList) > 0}">
+        <div class="col">
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="4" class="text-start" th:text="|Status Information|"></th>
+                </tr>
+                <tr>
+                    <th>Date</th>
+                    <th>Status From</th>
+                    <th>Status To</th>
+                    <th>Remarks</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="status: ${statusInfoList}">
+                    <td th:text="${#temporals.format(status.dateFrom, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${status.statusFrom}"></td>
+                    <td th:text="${status.statusTo}"></td>
+                    <td th:text="${status.comments}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${promotionInfoList != null && #lists.size(promotionInfoList) > 0}">
+        <div class="col">
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="5" class="text-start" th:text="|Promotion Information|"></th>
+                </tr>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Designation From</th>
+                    <th>Designation To</th>
+                    <th>Remarks</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="promotion: ${promotionInfoList}">
+                    <td th:text="${#temporals.format(promotion.dateFrom, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${promotion.type}"></td>
+                    <td th:text="${promotion.designationFrom}"></td>
+                    <td th:text="${promotion.designationTo}"></td>
+                    <td th:text="${promotion.comments}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${transferInfoList != null && #lists.size(transferInfoList) > 0}">
+        <div class="col">
+            <table class="table  text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="6" class="text-start" th:text="|Transfer Information|"></th>
+                </tr>
+                <tr>
+                    <th>Date</th>
+                    <th>Branch From</th>
+                    <th>Department From</th>
+                    <th>Branch To</th>
+                    <th>Department To</th>
+                    <th>Remarks</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="transfer: ${transferInfoList}">
+                    <td th:text="${#temporals.format(transfer.transferDate, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${transfer.getBranchFromName()}"></td>
+                    <td th:text="${transfer.getDepartmentFromName()}"></td>
+                    <td th:text="${transfer.getBranchToName()}"></td>
+                    <td th:text="${transfer.getDepartmentToName()}"></td>
+                    <td th:text="${transfer.comments}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${preJoiningInfoList != null && #lists.size(preJoiningInfoList) > 0}">
+        <div class="col">
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="3" class="text-start" th:text="|Attached with Foundation|"></th>
+                </tr>
+                <tr>
+                    <th>Center/Branch/Cell</th>
+                    <th>Organ/Cell</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="preJoin: ${preJoiningInfoList}">
+                    <td th:text="${preJoin.branchName}"></td>
+                    <td th:text="${preJoin.departmentName}"></td>
+                    <td th:text="${preJoin.description}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${khedmotInfoList != null && #lists.size(khedmotInfoList) > 0}">
+        <div class="col">
+            <table class="table  text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="3" class="text-start" th:text="|Khedmotaion Information|"></th>
+                </tr>
+                <tr>
+                    <th>Center/Branch/Cell</th>
+                    <th>Organ/Cell</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="khedmotaion: ${khedmotInfoList}">
+                    <td th:text="${khedmotaion.branchName}"></td>
+                    <td th:text="${khedmotaion.departmentName}"></td>
+                    <td th:text="${khedmotaion.description}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${educationInfoList != null && #lists.size(educationInfoList) > 0}">
+        <div class="col">
+            <table class="table  text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="7" class="text-start" th:text="|Academic Information|"></th>
+                </tr>
+                <tr>
+                    <th>Exam Name</th>
+                    <th>Passing Year</th>
+                    <th>Result</th>
+                    <th>Institute</th>
+                    <th>Board/University</th>
+                    <th>Group/Department</th>
+                    <th>Comments</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="education: ${educationInfoList}">
+                    <td th:text="${education.examName}"></td>
+                    <td th:text="${education.passingYear}"></td>
+                    <td th:text="${education.result}"></td>
+                    <td th:text="${education.institution}"></td>
+                    <td th:text="${education.board}"></td>
+                    <td th:text="${education.subjectDepartment}"></td>
+                    <td th:text="${education.comments}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${experienceInfoList != null && #lists.size(experienceInfoList) > 0}">
+        <div class="col">
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="5" class="text-start" th:text="|Working Experience|"></th>
+                </tr>
+                <tr>
+                    <th>Designation</th>
+                    <th>Institution</th>
+                    <th>Duration</th>
+                    <th>Responsibility</th>
+                    <th>Comments</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="experience: ${experienceInfoList}">
+                    <td th:text="${experience.designation}"></td>
+                    <td th:text="${experience.institution}"></td>
+                    <td th:text="${experience.duration}"></td>
+                    <td th:text="${experience.responsibility}"></td>
+                    <td th:text="${experience.comments}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${trainingInfoList != null && #lists.size(trainingInfoList) > 0}">
+        <div class="col">
+            <table class="table  text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="7" class="text-start" th:text="|Professional Course/Training/Seminar|"></th>
+                </tr>
+                <tr>
+                    <th>Course/Training</th>
+                    <th>Contents</th>
+                    <th>Duration</th>
+                    <th>Completed Year</th>
+                    <th>Certification</th>
+                    <th>Comments</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="training: ${trainingInfoList}">
+                    <td th:text="${training.courseName}"></td>
+                    <td class="text-break" th:text="${training.contents}"></td>
+                    <td th:text="${training.duration}"></td>
+                    <td th:text="${training.completedYear}"></td>
+                    <td th:text="${training.certification}"></td>
+                    <td th:text="${training.comments}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${extraQualificationInfoList != null && #lists.size(extraQualificationInfoList) > 0}">
+        <div class="col">
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="2" class="text-start" th:text="|Extra Curricular Activities|"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="qualification: ${extraQualificationInfoList}">
+                    <th scope="col" class="col-2">Description</th>
+                    <td scope="col" class="col-10" th:text="${qualification.description}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${langSkillInfoList != null && #lists.size(langSkillInfoList) > 0}">
+        <div class="col">
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="2" class="text-start" th:text="|Language Skill|"></th>
+                </tr>
+                <tr>
+                    <th>Language Name</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="language: ${langSkillInfoList}">
+                    <td th:text="${language.languageName}"></td>
+                    <td th:text="${language.description}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${familyInfoList != null && #lists.size(familyInfoList) > 0}">
+        <div class="col">
+            <table class="table text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="5" class="text-start" th:text="|Family Information|"></th>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <th>Relation</th>
+                    <th>Birthday</th>
+                    <th>Phone</th>
+                    <th>Comments</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="family: ${familyInfoList}">
+                    <td th:text="${family.name}"></td>
+                    <td th:text="${family.relation}"></td>
+                    <td th:text="${family.birthDate}"></td>
+                    <td th:text="${family.phone}"></td>
+                    <td th:text="${family.comments}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row mb-2" th:if="${punishmentInfoList != null && #lists.size(punishmentInfoList) > 0}">
+        <div class="col">
+            <table class="table table-striped  table-secondary text-center w-100">
+                <thead style="background-color: #eeeeee">
+                <tr>
+                    <th colspan="4" class="text-start" th:text="|Show Cause & Punishment|"></th>
+                </tr>
+                <tr>
+                    <th>Show Cause Date</th>
+                    <th>Show Cause Description</th>
+                    <th>Action Date</th>
+                    <th>Action Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="punishment: ${punishmentInfoList}">
+                    <td th:text="${#temporals.format(punishment.showCauseDate, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${punishment.showCauseDescription}"></td>
+                    <td th:text="${#temporals.format(punishment.actionDate, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${punishment.actionDescription}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        (() => {
+            const getImageUrl = '/employee/image/download'
+            const path = /*[[${employee.imagePath}]]*/ ''
+
+            if (path) {
+                fetch(generateRequestURL(getImageUrl, {path: path}))
+                    .then(response => response.json())
+                    .then(image => {
+                        document.getElementById('imageId').src = image.data
+                    })
+            }
+        })()
+    </script>
+</th:block>
+</body>
+</html>

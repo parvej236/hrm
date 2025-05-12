@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{all.change.history.title}">All Change History</title>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="${className ne null ? (className == 'Employee' ? ('Primary Info All Changes') : className + '  All Changes') : 'No changes found'}">All Changes</h4>
+<div id="content" layout:fragment="content">
+    <div class="row mb-2">
+        <div class="col-12">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>SL.</th>
+                        <th:block th:each="column : ${headerColumns}">
+                            <th th:text="${column}"></th>
+                        </th:block>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <th:block th:each="item : ${listItems}">
+                        <tr>
+                            <td th:text="${itemStat.count}"></td>
+                            <td th:each="column : ${columns}">
+                                <th:block th:if="${column eq 'actionTime'}" th:text="${item[__${column}__]}" />
+                                <th:block th:unless="${column eq 'actionTime'}" th:text="${item[__${column}__]}" />
+                            </td>
+                        </tr>
+                    </th:block>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

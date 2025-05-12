@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="sidemenu" th:with="
+                employeeAdd=${T(bd.org.quantum.hrm.common.Routes).ADD_EMPLOYEE},
+                employeeUpdate=${T(bd.org.quantum.hrm.common.Routes).UPDATE_EMPLOYEE},
+                employeeList=${T(bd.org.quantum.hrm.common.Routes).EMPLOYEES},
+                employeeReport=${T(bd.org.quantum.hrm.common.Routes).EMP_REPORT_CRITERIA},
+                designationEntry=${T(bd.org.quantum.hrm.common.Routes).DESIGNATION_ENTRY},
+                designationUpdate=${T(bd.org.quantum.hrm.common.Routes).DESIGNATION_UPDATE},
+                employeeDesignation=${T(bd.org.quantum.hrm.common.Routes).DESIGNATIONS},
+                empNoIds=${T(bd.org.quantum.hrm.common.Routes).ASSIGN_EMPLOYEE_ID},
+
+                attendanceCriteria=${T(bd.org.quantum.hrm.common.Routes).ATTENDANCE_CRITERIA},
+                attendanceAdd=${T(bd.org.quantum.hrm.common.Routes).ADD_ATTENDANCE},
+                attendanceApprove=${T(bd.org.quantum.hrm.common.Routes).ADD_ATTENDANCE},
+                attendanceList=${T(bd.org.quantum.hrm.common.Routes).ATTENDANCES},
+                attendanceReport=${T(bd.org.quantum.hrm.common.Routes).ATT_REPORT_CRITERIA},
+                bioAttendance=${T(bd.org.quantum.hrm.common.Routes).BIO_ATTENDANCES},
+                movements=${T(bd.org.quantum.hrm.common.Routes).MOVEMENTS},
+                addMovement=${T(bd.org.quantum.hrm.common.Routes).ADD_MOVEMENT},
+                updateMovement=${T(bd.org.quantum.hrm.common.Routes).UPDATE_MOVEMENT},
+                dailyView=${T(bd.org.quantum.hrm.common.Routes).DAILY_ATTENDANCE_VIEW},
+
+                yrCls=${T(bd.org.quantum.hrm.common.Routes).YR_CLS},
+                yrClEntry=${T(bd.org.quantum.hrm.common.Routes).YR_CL_ENTRY},
+                yrClUpdate=${T(bd.org.quantum.hrm.common.Routes).YR_CL_UPDATE},
+
+                leaveApply=${T(bd.org.quantum.hrm.common.Routes).LEAVE_APPLY},
+                leaveList=${T(bd.org.quantum.hrm.common.Routes).LEAVE_LIST},
+                leaveAuthorize=${T(bd.org.quantum.hrm.common.Routes).LEAVE_AUTHORIZE},
+                leaveApprove=${T(bd.org.quantum.hrm.common.Routes).LEAVE_APPROVE},
+                leaveConfirm=${T(bd.org.quantum.hrm.common.Routes).LEAVE_CONFIRM},
+                leaveReport=${T(bd.org.quantum.hrm.common.Routes).LEAVE_REPORT_CRITERIA},
+
+                idCardCriteria=${T(bd.org.quantum.hrm.common.Routes).ID_CARD_CRITERIA},
+                orderIdCard=${T(bd.org.quantum.hrm.common.Routes).ID_CARD_RECORDS},
+                orderedIdCards=${T(bd.org.quantum.hrm.common.Routes).ORDERED_ID_CARDS},
+                processedIdCards=${T(bd.org.quantum.hrm.common.Routes).PROCESSED_ID_CARDS},
+                acceptedIdCards=${T(bd.org.quantum.hrm.common.Routes).ACCEPTED_ID_CARDS},
+                uploadPhoto=${T(bd.org.quantum.hrm.common.Routes).PHOTO_FOR_ID_CARD},
+                
+                leaveApply=${T(bd.org.quantum.hrm.common.Routes).LEAVE_APPLY},
+                leaveList=${T(bd.org.quantum.hrm.common.Routes).LEAVE_LIST},
+                leaveAuthorize=${T(bd.org.quantum.hrm.common.Routes).LEAVE_AUTHORIZE},
+                leaveApprove=${T(bd.org.quantum.hrm.common.Routes).LEAVE_APPROVE},
+                leaveConfirm=${T(bd.org.quantum.hrm.common.Routes).LEAVE_CONFIRM},
+                leaveReport=${T(bd.org.quantum.hrm.common.Routes).LEAVE_REPORT_CRITERIA},
+                leaveUpdate=${T(bd.org.quantum.hrm.common.Routes).ADD_LEAVE_UPDATE_REQUEST},
+                leaveUpdateList=${T(bd.org.quantum.hrm.common.Routes).LEAVE_UPDATE_REQUESTS}
+
+  ">
+    <ul class="nav flex-column">
+        <li class="nav-item align-items-center" th:if="${menuAuthorizer.canViewEmployeeMenu}"
+            th:with="startWithEmployeeAdd=${#request.requestURI.startsWith(employeeAdd)},
+            startWithEmployeeUpdate=${#request.requestURI.startsWith(employeeUpdate)},
+            startWithEmployeeList=${#request.requestURI.startsWith(employeeList)},
+            startWithEmployeeReport=${#request.requestURI.startsWith(employeeReport)},
+            startWithEmployeeDesignation=${#request.requestURI.startsWith(employeeDesignation)},
+            startWithDesignationEntry=${#request.requestURI.startsWith(designationEntry)},
+            startWithDesignationUpdate=${#request.requestURI.startsWith(designationUpdate)},
+            startWithEmpNoIds=${#request.requestURI.startsWith(empNoIds)}"
+        >
+            <a aria-current="page" class="nav-link btn-toggle collapsed" data-bs-toggle="collapse"
+               data-bs-target="#employee"
+               th:classappend="${startWithEmployeeAdd ? 'active': (startWithEmployeeUpdate ? 'active' : (startWithEmployeeList ? 'active' : (startWithEmployeeReport ? 'active' : (startWithDesignationEntry ? 'active' : (startWithDesignationUpdate ? 'active' : (startWithEmployeeDesignation ? 'active' : (startWithEmpNoIds ? 'active' : '')))))))}"
+               th:attr="aria-expanded=${startWithEmployeeAdd ? 'true': (startWithEmployeeUpdate ? 'true' : (startWithEmployeeList ? 'true' : (startWithEmployeeReport ? 'true' : (startWithDesignationEntry ? 'true' : (startWithDesignationUpdate ? 'true' : (startWithEmployeeDesignation ? 'true' : (startWithEmpNoIds ? 'true' : 'false')))))))}">
+                <i class="bi bi-person-badge me-2"></i>Employee
+            </a>
+            <div id="employee" class="collapse"
+                 th:classappend="${startWithEmployeeAdd ? 'show' : (startWithEmployeeUpdate ? 'show' : (startWithEmployeeList ? 'show' : (startWithEmployeeReport ? 'show' : (startWithDesignationEntry ? 'show' : (startWithDesignationUpdate ? 'show' : (startWithEmployeeDesignation ? 'show' : (startWithEmpNoIds ? 'show' : '')))))))}">
+                <ul class="btn-toggle-nav list-unstyled fw-normal pb-1">
+                    <li><a href="#" class="link-dark"
+                           th:classappend="${startWithEmployeeAdd ? 'active-item': (startWithEmployeeUpdate ? 'active-item': '')}"
+                           th:href="@{${employeeAdd}}" th:if="${menuAuthorizer.canCreateEmployee}"><i
+                            class="bi bi-plus-square-fill me-2"></i>Entry</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithEmployeeList ? 'active-item': ''}"
+                           th:href="@{${employeeList}}" th:if="${menuAuthorizer.canViewEmployee}"><i
+                            class="bi bi-list me-2"></i>List</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithEmpNoIds ? 'active-item': ''}"
+                           th:href="@{${empNoIds}}" th:if="${menuAuthorizer.canCreateEmployee}"><i
+                            class="bi bi-9-square me-2"></i>Assign Id</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithEmployeeReport ? 'active-item': ''}"
+                           th:href="@{${employeeReport}}" th:if="${menuAuthorizer.canViewEmployeeReport}"><i
+                            class="bi bi-bar-chart-line me-2"></i>Report</a></li>
+                    <li><a href="#" class="link-dark"
+                           th:classappend="${startWithEmployeeDesignation ? 'active-item': (startWithDesignationEntry ? 'active-item': (startWithDesignationUpdate ? 'active-item': ''))}"
+                           th:href="@{${employeeDesignation}}" th:if="${menuAuthorizer.canManageEmployeeDesignation}"><i
+                            class="bi bi-star-fill me-2"></i>Designation</a></li>
+                </ul>
+            </div>
+        </li>
+
+        <li class="nav-item align-items-center" th:if="${menuAuthorizer.canViewAttendanceMenu}"
+            th:with="startWithAttendanceCriteria=${#request.requestURI.startsWith(attendanceCriteria)},
+            startWithAttendanceAdd=${#request.requestURI.startsWith(attendanceAdd)},
+            startWithAttendanceApprove=${#request.requestURI.startsWith(attendanceApprove)},
+            startWithAttendanceList=${#request.requestURI.startsWith(attendanceList)},
+            startWithBioAttendance=${#request.requestURI.startsWith(bioAttendance)},
+            startWithMovements=${#request.requestURI.startsWith(movements)},
+            startWithAddMovement=${#request.requestURI.startsWith(addMovement)},
+            startWithUpdateMovement=${#request.requestURI.startsWith(updateMovement)},
+            startWithAttendanceReport=${#request.requestURI.startsWith(attendanceReport)},
+            startWithDailyView=${#request.requestURI.startsWith(dailyView)}"
+        >
+            <a aria-current="page" class="nav-link btn-toggle collapsed" data-bs-toggle="collapse"
+               data-bs-target="#attendance"
+               th:classappend="${startWithAttendanceAdd ? 'active': (startWithAttendanceApprove ? 'active' : (startWithAttendanceList ? 'active' : (startWithAttendanceReport ? 'active' : (startWithBioAttendance ? 'active' : (startWithMovements ? 'active' : (startWithAddMovement ? 'active' : (startWithUpdateMovement ? 'active' : (startWithDailyView ? 'active' : '' ))))))))}"
+               th:attr="aria-expanded=${startWithAttendanceAdd ? 'true': (startWithAttendanceApprove ? 'true' : (startWithAttendanceList ? 'true' : (startWithAttendanceReport ? 'true' : (startWithBioAttendance ? 'true' : (startWithMovements ? 'true' : (startWithAddMovement ? 'true' : (startWithUpdateMovement ? 'true' : (startWithDailyView ? 'true' : '' ))))))))}">
+                <i class="bi bi-layout-text-window-reverse me-2"></i>Attendance
+            </a>
+            <div id="attendance" class="collapse"
+                 th:classappend="${startWithAttendanceCriteria ? 'show' : (startWithAttendanceAdd ? 'show' : (startWithAttendanceApprove ? 'show' : (startWithAttendanceList ? 'show' : (startWithAttendanceReport ? 'show' : (startWithBioAttendance ? 'show' : (startWithMovements ? 'show' : (startWithAddMovement ? 'show' : (startWithUpdateMovement ? 'show' : (startWithDailyView ? 'show' : '' )))))))))}">
+                <ul class="btn-toggle-nav list-unstyled fw-normal pb-1">
+                    <li><a href="#" class="link-dark"
+                           th:classappend="${startWithAttendanceCriteria ? 'active-item': ''}"
+                           th:href="@{${attendanceCriteria}}" th:if="${menuAuthorizer.canCreateAttendance}"><i
+                            class="bi bi-plus-square-fill me-2"></i>Entry</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithAttendanceApprove ? 'active-item': ''}"
+                           th:href="@{${attendanceCriteria+'?isApprove='+true}}"
+                           th:if="${menuAuthorizer.canApproveAttendance}"><i class="bi bi-check-square me-2"></i>Approve</a>
+                    </li>
+                    <li><a href="#" class="link-dark"
+                           th:classappend="${startWithMovements ? 'active-item' : (startWithAddMovement ? 'active-item' : (startWithUpdateMovement ? 'active-item' : ''))}"
+                           th:href="@{${movements}}" th:if="${menuAuthorizer.canCreateAttendance}"><i
+                            class="bi bi-list me-2"></i>Movements</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithBioAttendance ? 'active-item': ''}"
+                           th:href="@{${bioAttendance}}" th:if="${menuAuthorizer.canCreateAttendance}"><i
+                            class="bi bi-list me-2"></i>Biometric</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithDailyView ? 'active-item': ''}"
+                           th:href="@{${dailyView}}" th:if="${menuAuthorizer.canCreateAttendance}"><i
+                            class="bi bi-intersect me-2"></i>Daily View</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithAttendanceReport ? 'active-item': ''}"
+                           th:href="@{${attendanceReport}}" th:if="${menuAuthorizer.canViewAttendanceReport}"><i
+                            class="bi bi-bar-chart-line me-2"></i>Report</a></li>
+                </ul>
+            </div>
+        </li>
+
+        <li class="nav-item align-items-center" th:if="${menuAuthorizer.canViewLeaveMenu}"
+            th:with="startWithYrCls=${#request.requestURI.startsWith(yrCls)},
+            startWithYrClEntry=${#request.requestURI.startsWith(yrClEntry)},
+            startWithYrClUpdate=${#request.requestURI.startsWith(yrClUpdate)},
+            startWithLeaveApply=${#request.requestURI.startsWith(leaveApply)},
+            startWithLeaveList=${#request.requestURI.startsWith(leaveList)},
+            startWithLeaveAuthorize=${#request.requestURI.startsWith(leaveAuthorize)},
+            startWithLeaveApprove=${#request.requestURI.startsWith(leaveApprove)},
+            startWithLeaveConfirm=${#request.requestURI.startsWith(leaveConfirm)},
+            startWithLeaveReport=${#request.requestURI.startsWith(leaveReport)},
+            startWithLeaveUpdate=${#request.requestURI.startsWith(leaveUpdate)},
+            startWithLeaveUpdateList=${#request.requestURI.startsWith(leaveUpdateList)}"
+        >
+            <a aria-current="page" class="nav-link btn-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#leave"
+               th:classappend="${startWithYrCls ? 'active' : (startWithYrClEntry ? 'active' : (startWithYrClUpdate ? 'active' : (startWithLeaveApply ? 'active': (startWithLeaveList ? 'active' : (startWithLeaveAuthorize ? 'active' : (startWithLeaveApprove ? 'active' : (startWithLeaveConfirm ? 'active' : (startWithLeaveReport ? 'active' : (startWithLeaveUpdate ? 'active' : (startWithLeaveUpdateList ? 'active' : ''))))))))))}"
+               th:attr="aria-expanded=${startWithYrCls ? 'true' : (startWithYrClEntry ? 'true' : (startWithYrClUpdate ? 'true' : (startWithLeaveApply ? 'true': (startWithLeaveList ? 'true' : (startWithLeaveAuthorize ? 'true' : (startWithLeaveApprove ? 'true' : (startWithLeaveConfirm ? 'true' : (startWithLeaveReport ? 'true' : (startWithLeaveUpdate ? 'true' : (startWithLeaveUpdateList ? 'true' : 'false'))))))))))}">
+                <i class="bi bi-calendar-check me-2"></i>Leave
+            </a>
+            <div id="leave" class="collapse" th:classappend="${startWithYrCls ? 'show' : (startWithYrClEntry ? 'show' : (startWithYrClUpdate ? 'show' : (startWithLeaveApply ? 'show': (startWithLeaveList ? 'show' : (startWithLeaveAuthorize ? 'show' : (startWithLeaveApprove ? 'show' : (startWithLeaveConfirm ? 'show' : (startWithLeaveReport ? 'show' : (startWithLeaveUpdate ? 'show' : (startWithLeaveUpdateList ? 'show' : ''))))))))))}">
+                <ul class="btn-toggle-nav list-unstyled fw-normal pb-1">
+                    <li><a href="#" class="link-dark" th:classappend="${(startWithYrCls || startWithYrClEntry || startWithYrClUpdate) ? 'active-item': ''}" th:href="@{${yrCls}}" th:if="${menuAuthorizer.canViewYrCls}"><i class="bi bi-watch me-2"></i>Yr Cl</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithLeaveApply ? 'active-item': ''}" th:href="@{${leaveApply}}" th:if="${menuAuthorizer.canApplyLeave}"><i class="bi bi-plus-circle me-2"></i>Apply</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithLeaveList ? 'active-item': ''}" th:href="@{${leaveList}}" th:if="${menuAuthorizer.canListLeave}"><i class="bi bi-list me-2"></i>List</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithLeaveAuthorize ? 'active-item': ''}" th:href="@{${leaveAuthorize}}" th:if="${menuAuthorizer.canViewAuthorizeLeave}"><i class="bi bi-shield me-2"></i> Authorize</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithLeaveApprove ? 'active-item': ''}" th:href="@{${leaveApprove}}" th:if="${menuAuthorizer.canViewApproveLeave}"><i class="bi bi-shield-check me-2"></i> Approve</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithLeaveConfirm ? 'active-item': ''}" th:href="@{${leaveConfirm}}" th:if="${menuAuthorizer.canViewConfirmLeave}"><i class="bi bi-check-circle me-2"></i> Confirm</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithLeaveUpdate ? 'active-item': ''}" th:href="@{${leaveUpdate}}" th:if="${menuAuthorizer.canViewAuthorizeLeave || menuAuthorizer.canViewApproveLeave}"><i class="bi bi-file-earmark-text"></i> Leave Update</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithLeaveUpdateList ? 'active-item': ''}" th:href="@{${leaveUpdateList}}" th:if="${menuAuthorizer.canViewAuthorizeLeave || menuAuthorizer.canViewApproveLeave}"><i class="bi bi-list me-2"></i> Leave Update List</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithLeaveReport ? 'active-item': ''}" th:href="@{${leaveReport}}" th:if="${menuAuthorizer.canViewLeaveReport}"><i class="bi bi-bar-chart-line me-2"></i> Report</a></li>
+                </ul>
+            </div>
+        </li>
+
+        <li class="nav-item align-items-center" th:if="${menuAuthorizer.canViewIdCardMenu}"
+            th:with="startWithIdCardCriteria=${#request.requestURI.startsWith(idCardCriteria)},
+            startWithOrderIdCard=${#request.requestURI.startsWith(orderIdCard)},
+            startWithOrderedIdCards=${#request.requestURI.startsWith(orderedIdCards)},
+            startWithProcessedIdCards=${#request.requestURI.startsWith(processedIdCards)},
+            startWithOrderedList=${#request.requestURI.startsWith(acceptedIdCards)},
+            startWithUploadPhoto=${#request.requestURI.startsWith(uploadPhoto)}"
+        >
+            <a aria-current="page" class="nav-link btn-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#idCard"
+               th:classappend="${startWithIdCardCriteria ? 'active' : (startWithOrderIdCard ? 'active' : (startWithOrderedIdCards ? 'active' : (startWithProcessedIdCards ? 'active' : (startWithOrderedList ? 'active' :  (startWithUploadPhoto ? 'active' : '')))))}"
+               th:attr="aria-expanded=${startWithIdCardCriteria ? 'true' : (startWithOrderIdCard ? 'true' : (startWithOrderedIdCards ? 'true' : (startWithProcessedIdCards ? 'true' : (startWithOrderedList ? 'true' : (startWithUploadPhoto ? 'true' : 'false')))))}">
+                <i class="bi bi-cart me-2"></i>ID Card
+            </a>
+            <div id="idCard" class="collapse" th:classappend="${startWithIdCardCriteria ? 'show' : (startWithOrderIdCard ? 'show' : (startWithOrderedIdCards ? 'show' : (startWithProcessedIdCards ? 'show' : (startWithOrderedList ? 'show' : (startWithUploadPhoto ? 'show' : '')))))}">
+                <ul class="btn-toggle-nav list-unstyled fw-normal pb-1">
+                    <li><a href="#" class="link-dark" th:classappend="${startWithIdCardCriteria ? 'active-item': (startWithOrderIdCard ? 'active-item': '')}" th:href="@{${idCardCriteria}}" th:if="${menuAuthorizer.canOrderIdCard}"><i class="bi bi-cart-plus me-2"></i>Order</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithOrderedIdCards ? 'active-item': ''}" th:href="@{${orderedIdCards}}" th:if="${menuAuthorizer.canOrderIdCard || menuAuthorizer.canProcessIdCard}"><i class="bi bi-cart-check me-2"></i>Ordered</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithProcessedIdCards ? 'active-item': ''}" th:href="@{${processedIdCards}}" th:if="${menuAuthorizer.canProcessIdCard}"><i class="bi bi-cart-check me-2"></i>Processed</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithOrderedList ? 'active-item': ''}" th:href="@{${acceptedIdCards}}" th:if="${menuAuthorizer.canProcessIdCard}"><i class="bi bi-cart-check-fill me-2"></i>List</a></li>
+                    <li><a href="#" class="link-dark" th:classappend="${startWithUploadPhoto ? 'active-item': ''}" th:href="@{${uploadPhoto}}" th:if="${menuAuthorizer.canProcessIdCard}"><i class="bi bi-cart-check-fill me-2"></i>Upload Photo</a></li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</div>
+</body>
+
+</html>

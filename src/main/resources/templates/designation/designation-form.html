@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+    <h4 layout:fragment="content-header" th:text="${formTitle}"></h4>
+</head>
+<body>
+
+<div id="content" layout:fragment="content">
+    <form method="post" th:object="${designation}" th:action="${entryLink}">
+        <input type="hidden" th:field="*{id}">
+        <div class="card card-mb-3 mb-4 border-blue-100">
+            <div class="card-header border-blue-100">
+                <h5 class="card-header-custom text-primary d-flex justify-content-between">Designation Form</h5>
+            </div>
+            <div class="card-body">
+
+                <div class="row">
+                    <p class="error-message text-danger"></p>
+                    <label class="col-md-2 mb-1">Name:</label>
+                    <div class="col-md-10 mb-1">
+                        <div class="input-group">
+                            <input type="hidden" th:field="*{id}">
+                            <input type="text" class="form-control" id="designationName" onblur="checkDesignationName(this.value)" autocomplete="off" th:field="*{name}" required>
+                            <span th:if="${#fields.hasErrors('name')}" th:errorclass="error" th:errors="*{name}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label class="col-md-2 mb-1">Sorting Order:</label>
+                    <div class="col-md-10 mb-1">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="designationSortingOrder"
+                                   placeholder="4 character only" th:field="*{sortingOrder}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label class="col-md-2 mb-1">Grade:</label>
+                    <div class="col-md-10 mb-1">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="designationGrade"
+                                   placeholder="A-G any single character only" th:field="*{grade}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label class="col-md-2 mb-1">Status:</label>
+                    <div class="col-md-6 mb-1">
+                        <div class="input-group">
+                                <input type="radio" id="designationStatusActive" th:field="*{status}" value="1">
+                                <span>&nbsp;Active</span>
+                                <span class="col-md-1"></span>
+                                <input type="radio" id="designationStatusInactive" th:field="*{status}" value="0">
+                                <span>&nbsp;Inactive</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label for="remarks" class="form-label col-md-2 mb-1">Remarks:</label>
+                    <div class="col-md-10 mb-1">
+                        <textarea id="remarks" class="form-control" th:field="*{remarks}"></textarea>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="buttons">
+            <button class="btn btn-primary mt-4 mb-5" th:text="${designation.id > 0 ? 'Update' : 'Save'}"
+                    type="submit"></button>
+        </div>
+
+    </form>
+    <th:block th:replace="common/toast.html :: toast"/>
+</div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        function checkDesignationName(name) {
+            let url = /*[[${checkUrl}]]*/'/designation-check';
+
+            url += '?name=' + name;
+            getApi(url).then(result => {
+                if (result.data) {
+                    document.querySelector('.error-message').innerText = `Designation **${name}** already exists...!`;
+                    document.getElementById('designationName').value = '';
+                }
+            })
+        }
+    </script>
+</th:block>
+</body>
+</html>

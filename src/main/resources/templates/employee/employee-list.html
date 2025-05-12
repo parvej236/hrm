@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorator="~{layouts/layout}">
+<head>
+    <title th:text="${formTitle}">List</title>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+</head>
+<body>
+<h4 layout:fragment="content-header" th:text="${formTitle}">List</h4>
+<div layout:fragment="content">
+
+    <div id="employeeFilters" class="m-3">
+        <div class="row mb-2">
+            <select id="branch" class="form-select" name="branch" onchange="loadDepartment()">
+                <option value="">Search by Branch</option>
+                <option th:each="branch : ${branchList}" th:value="${branch.id}" th:text="${branch.name}"></option>
+            </select>
+        </div>
+        <div class="row mb-2">
+            <select id="department" class="form-select" name="department">
+                <option value="">Search by Department</option>
+            </select>
+        </div>
+        <div class="row mb-2">
+            <div class="input-group ps-0 pe-0">
+                <select id="designation" class="form-select" name="designation">
+                    <option value="">Search by Designation</option>
+                    <option th:each="designation : ${designationMap}" th:value="${designation.value}" th:text="${designation.value}"></option>
+                </select>
+                <input id="designationSearch" class="form-control" type="text" oninput="searchDesignation(event)" placeholder="type to search designation">
+                <div id="designationSearchResults" class="dropdown-menu" style="display: none;"></div>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <select id="gender" class="form-select" name="gender">
+                <option value="">Search by Gender</option>
+                <option th:each="gender : ${genderMap}" th:value="${gender.key}" th:text="${gender.value}"></option>
+            </select>
+        </div>
+        <div class="row mb-2">
+            <select id="status" class="form-select" name="empStatus">
+                <option value="">Search by Status</option>
+                <option th:each="status : ${empStatusMap}" th:value="${status.key}" th:text="${status.value}"></option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="table" th:attr="data-url=${searchUrl}">
+            <thead>
+            <tr>
+                <th data-column-name="action">Action</th>
+                <th data-column-name="employeeId">Employee ID</th>
+                <th data-column-name="nameEn" sortable="true">Name</th>
+                <th data-column-name="designation.name">Designation</th>
+                <th data-column-name="hiring">Joining</th>
+                <th data-column-name="branchName">Branch</th>
+                <th data-column-name="primaryPhone">Phone</th>
+                <th data-column-name="regCode">Reg. Code</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <th:block th:replace="common/toast.html :: toast"/>
+</div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const designationMap = /*[[${designationMap}]]*/ null
+
+        const table = new DataTable('#table', {
+            omniPlaceholder: "Name or registration or phone",
+            sortColumn: "designation.sortingOrder",
+            filterEnabled: true,
+            filterSelector: "employeeFilters",
+
+            customizeSearch: (el)  => {
+                const eId = document.createElement('input')
+                eId.name = 'employeeId'
+                eId.placeholder = 'Employee ID'
+                eId.classList.add('form-control')
+                el.before(eId)
+            },
+
+            formatter: {
+                action: (el, column, rowData) => {
+                    const profileUrl = /*[[${profileUrl}]]*/ '/employee-profile'
+                    const detailsUrl = /*[[${detailsUrl}]]*/ '/attendance-details'
+                    el.innerHTML = `<a href="${detailsUrl}?id=${rowData.id}"
+                    id="detailsButton" class="link-offset-2 link-underline link-underline-opacity-0" target="_blank">
+                    Attendances
+                    </a>
+                    <br>
+                    <a href="${profileUrl}?id=${rowData.id}" id="editButton"
+                    class="link-offset-2 link-underline link-underline-opacity-0"
+                    target="_blank">Profile</a>
+                    `
+                },
+                employeeId: (el, column, rowData) => {
+                    const tempIdStatus = ['Muster Roll', 'Contractual', 'Part-Time', 'Probationary', 'Intern']
+                    const empId = `${rowData.hiring.split('/')[2].substr(-2)}${rowData.employeeId}`
+                    el.innerHTML = `${(tempIdStatus.includes(rowData.status) && rowData.tempEmployeeId !== null) ? rowData.tempEmployeeId : (rowData.employeeId !== null ? empId : '')}`
+                }
+            }
+        })
+
+        function loadDepartment() {
+            const branchId = document.getElementById('branch').value
+            const url = `/department-list/${branchId}`
+            const deptIdElement = document.getElementById('department')
+
+            const options = []
+            options.push(`<option value=''>Search by Department</option>`)
+
+            if (branchId !== undefined && branchId !== '0') {
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.map(dept => options.push(`<option value='${dept.id}'>${dept.name}</option>`))
+                        deptIdElement.innerHTML = options.join('')
+                    })
+                    .catch(error => {
+                        console.error('Error fetching department list:', error)
+                    });
+            }
+        }
+
+        function searchDesignation(event) {
+            if (event.target.value.length >= 3) {
+                const searchTerm = event.target.value.toLowerCase();
+                let filteredDesignation = []
+                Object.entries(designationMap).forEach((value, key) => {
+                    if (value[1].toLowerCase().includes(searchTerm)) {
+                        const obj = { id: value[0], name: value[1] }
+                        filteredDesignation.push(obj)
+                    }
+                })
+                displaySearchResultsForDesignation(filteredDesignation);
+            }
+        }
+
+        function displaySearchResultsForDesignation(designations) {
+            const searchResults = document.getElementById('designationSearchResults')
+            searchResults.innerHTML = ''
+
+            designations.forEach(designation => {
+                const option = document.createElement('div')
+                option.classList.add('dropdown-item')
+                option.classList.add('text-primary')
+                option.textContent = `${designation.name}`
+                option.addEventListener('click', () => selectDesignation(designation))
+                searchResults.appendChild(option)
+            })
+
+            searchResults.style.display = designations.length > 0 ? 'block' : 'none'
+        }
+
+        function selectDesignation(designation) {
+            document.getElementById('designation').value = designation.name
+            document.getElementById('designationSearchResults').style.display = 'none'
+            document.getElementById('designationSearch').value = ''
+        }
+    </script>
+</th:block>
+</body>
+</html>

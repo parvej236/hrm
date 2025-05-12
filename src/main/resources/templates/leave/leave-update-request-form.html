@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="(${request.id > 0} ? #{leave.update.request.form.title} : #{leave.update.request})"></title>
+    <script type="text/javascript" th:src="@{/resources/js/scripts.js}"></script>
+</head>
+<body>
+
+<h4 layout:fragment="content-header"
+    th:text="(${request.id > 0} ? #{leave.update.request.form.title} : #{leave.update.request})"></h4>
+<div id="content" layout:fragment="content">
+    <form method="post" th:object="${request}">
+
+        <div class="card mb-3 border-blue-100">
+            <h5 class="card-header card-header-custom text-primary d-flex justify-content-between">Application Details</h5>
+            <div class="card-body">
+                <div class="row" th:if="${request.stage == null || request.stage == 'Requested'}">
+                    <div class="col-md-2 mt-2">
+                        <label for="leaveSearch">Search<span class="text-danger">*</span></label>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input class="form-control autocomplete leaveSearch"
+                                   placeholder="Type reg / employee id to search" id="leaveSearch" autocomplete="off"
+                                   data-search-url="/get-leave-applications-by-employee-info?employeeInfo="
+                                   th:required="${request.stage eq null ? 'required' : null}">
+                            <span class="input-group-text" role="button">
+                                <i class="bi bi-search"></i></span>
+                            <span class="input-group-text rounded-end" role="button"
+                                  onclick="clearEmployee()">Clear</span>
+                        </div>
+                        <span th:if="${#fields.hasErrors('applicationId')}" th:errorclass="error"
+                              th:errors="*{applicationId}"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-md-2 mt-2 form-label" for="employeeName">Name</label>
+                    <div class="col-md-10">
+                        <input type="hidden" th:field="*{id}">
+                        <input type="hidden" th:field="*{stage}">
+                        <input type="hidden" th:id="applicationId" th:field="*{applicationId}">
+
+                        <input type="hidden" th:field="*{requestedOn}">
+                        <input type="hidden" th:field="*{requestedBy}">
+                        <input type="hidden" th:field="*{requestedByName}">
+                        <input type="hidden" th:field="*{authorizedOn}">
+                        <input type="hidden" th:field="*{authorizedBy}">
+                        <input type="hidden" th:field="*{authorizedByName}">
+                        <input type="hidden" th:field="*{approvedOn}">
+                        <input type="hidden" th:field="*{approvedBy}">
+                        <input type="hidden" th:field="*{approvedByName}">
+                        <input type="hidden" th:field="*{rejectedOn}">
+                        <input type="hidden" th:field="*{rejectedBy}">
+                        <input type="hidden" th:field="*{rejectedByName}">
+
+                        <div class="form-control-plaintext" id="employeeName" th:text="${request.application.applicant.nameEn}"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-md-2 mt-2 form-label" for="employeeDesignation">Designation</label>
+                    <div class="col-md-10">
+                        <div class="form-control-plaintext" id="employeeDesignation"
+                             th:text="${request.application.applicant.designation.name}"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-md-2 mt-2 form-label" for="employeeC/B/C">C/B/C</label>
+                    <div class="col-md-10" th:with="branch=${request.application.applicant.branchName},dept=${request.application.applicant.departmentName}">
+                        <div class="form-control-plaintext" id="employeeC/B/C"
+                             th:text="|${branch ne null ? branch : ''}${dept ne null ? ' (' + dept + ')' : ''}|"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-md-2 mt-2 form-label" for="employeePhone">Phone</label>
+                    <div class="col-md-10">
+                        <div class="form-control-plaintext" id="employeePhone"
+                             th:text="${request.application.applicant.primaryPhone}"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-md-2 mt-2 form-label" for="durationText">Leave Reason</label>
+                    <div class="col-md-10">
+                        <div class="form-control-plaintext" id="leaveReason"
+                             th:text="${request.application.leaveReason}"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-md-2 mt-2 form-label" for="durationText">Duration</label>
+                    <div class="col-md-10" th:with="from=${request.application.leaveFrom},to=${request.application.leaveTo},days=${request.application.leaveDays}">
+                        <div class="form-control-plaintext" id="durationText"
+                             th:text="|${from ne null ? #temporals.format(from, 'dd/MM/yyyy') : ''} - ${to ne null ? #temporals.format(to, 'dd/MM/yyyy') : ''}${days gt 0 ? ' (' + days + ' Days)' : ''}|"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-md-2 mt-2 form-label" for="durationText">Leave Details</label>
+                    <div class="col-md-6">
+                        <table class="table table-bordered table-striped table-hover mb-2">
+                            <thead class="text-center">
+                            <tr>
+                                <th class="w-25">Type</th>
+                                <th class="w-50">Date</th>
+                                <th class="w-25">Days</th>
+                            </tr>
+                            </thead>
+                            <tbody id="dynamicTbody">
+                            <tr th:each="item: ${request.oldDetails}" th:if="${request.id gt 0}">
+                                <td>
+                                    <input type="hidden" th:field="*{oldDetails[__${itemStat.index}__].id}" th:id="'oldDetails_'+${itemStat.index}+'_id'">
+                                    <input type="hidden" th:field="*{oldDetails[__${itemStat.index}__].leaveType}" th:id="'oldDetails_'+${itemStat.index}+'_leaveType'">
+                                    <input type="text" class="form-control-plaintext" th:value="${leaveTypes[item.leaveType]}">
+                                </td>
+                                <td>
+                                    <input type="hidden" th:field="*{oldDetails[__${itemStat.index}__].dateFrom}" th:id="'oldDetails_'+${itemStat.index}+'_dateFrom'">
+                                    <input type="hidden" th:field="*{oldDetails[__${itemStat.index}__].dateTo}" th:id="'oldDetails_'+${itemStat.index}+'_dateTo'">
+                                    <input type="text" class="form-control-plaintext" th:value="|${#temporals.format(item.dateFrom, 'dd/MM/yyyy')} - ${#temporals.format(item.dateTo, 'dd/MM/yyyy')}|">
+                                </td>
+                                <td>
+                                    <input type="hidden" th:field="*{oldDetails[__${itemStat.index}__].days}" th:id="'oldDetails_'+${itemStat.index}+'_days'">
+                                    <input type="text" class="form-control-plaintext" th:value="${item.days}">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <div th:if="${request.stage == null}" id="notification" class="text-center"></div>
+                        <th:block th:unless="${request.stage == null}" th:utext="${leaveNote}"></th:block>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3 border-blue-100">
+            <h5 class="card-header card-header-custom text-primary d-flex justify-content-between">Update Leave</h5>
+            <div class="card-body">
+                <div class="row">
+                    <label class="col-md-2 mt-2 form-label" for="durationText">Duration<span class="text-danger">*</span></label>
+                    <div class="col-md-8 mt-2">
+                        <div class="input-group" th:if="${request.stage == null || request.stage == 'Requested'}">
+                            <input type="text" class="form-control fromDate" id="fromDate" onclick="leaveDuration()" onblur="stopInterval()" th:field="*{dateFrom}" required>
+                            <span class="input-group-text">To</span>
+                            <input type="text" class="form-control toDate" id="toDate" onclick="leaveDuration()" onblur="stopInterval()" th:field="*{dateTo}" required>
+                        </div>
+                        <div th:unless="${request.stage == null || request.stage == 'Requested'}">
+                            <div class="form-control-plaintext"
+                                 th:text="${request.dateFrom + ' To ' + request.dateTo}"></div>
+                            <input type="hidden" id="fromDate" th:field="*{dateFrom}">
+                            <input type="hidden" id="toDate" th:field="*{dateTo}">
+                        </div>
+                        <span th:if="${#fields.hasErrors('duration')}" th:errorclass="error"
+                              th:errors="*{duration}"></span>
+                    </div>
+                    <span class="col-md-2" id="leaveDuration">
+                                <span th:if="${request.duration != 0}">
+                                    Total <span th:text="${request.duration}"></span> Day(s)
+                                </span>
+                            </span>
+                    <input type="hidden" id="leaveDays" th:field="*{duration}">
+                </div>
+                <div class="row">
+                    <label class="col-md-2 form-label" for="reason">Remarks<span class="text-danger">*</span></label>
+                    <div class="col-md-8 mt-2">
+                        <textarea class="form-control" id="reason" th:if="${request.stage == null || request.stage == 'Requested'}" th:field="*{remarks}" required></textarea>
+                        <div th:unless="${request.stage == null || request.stage == 'Requested'}">
+                            <span class="form-control-plaintext" th:text="${request.remarks}"></span>
+                            <input type="hidden" th:field="*{remarks}">
+                        </div>
+                        <span th:if="${#fields.hasErrors('remarks')}" th:errorclass="error" th:errors="*{remarks}"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mt-2">
+                        <span class="d-none durationMatchText"></span>
+                        <table class="table" id="leavesDetailsTable">
+                            <thead>
+                            <tr class="table-secondary">
+                                <th class="col-2">Leave Type</th>
+                                <th class="col-2">From</th>
+                                <th class="col-2">To</th>
+                                <th class="col-2">Days</th>
+                                <th class="col-3">Remarks</th>
+                                <th class="col-1">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="leaveDetailsRow" th:id="|row_${detailStat.index}|"
+                                th:each="detail : ${request.updateDetails}">
+                                <td>
+                                    <input type="hidden" th:field="*{updateDetails[__${detailStat.index}__].id}">
+                                    <input type="hidden" th:field="*{updateDetails[__${detailStat.index}__].applicationId}">
+                                    <select class="form-select leaveTypeOption" th:field="*{updateDetails[__${detailStat.index}__].leaveType}" th:id="|leaveTypes_${detailStat.index}|">
+                                        <option th:each="type: ${leaveTypes}" th:value="${type.key}" th:text="${type.value}"></option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input class="form-control fromDate" type="text" th:field="*{updateDetails[__${detailStat.index}__].dateFrom}" th:id="|leavesTypeFromDate_${detailStat.index}|"
+                                           onblur="stopInterval()" th:onclick="|detailsDuration(${detailStat.index})|" required>
+                                </td>
+                                <td>
+                                    <input class="form-control toDate" type="text"
+                                           th:field="*{updateDetails[__${detailStat.index}__].dateTo}"
+                                           th:id="|leavesTypeToDate_${detailStat.index}|"
+                                           onblur="stopInterval()" th:onclick="|detailsDuration(${detailStat.index})|" required>
+                                </td>
+                                <td>
+                                    <input class="form-control leaveDays" type="text"
+                                           th:field="*{updateDetails[__${detailStat.index}__].days}"
+                                           th:id="|days_${detailStat.index}|" required>
+                                </td>
+                                <td>
+                                    <input class="form-control remarks"
+                                           th:field="*{updateDetails[__${detailStat.index}__].remarks}" type="text">
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" class="btn btn-danger bi-trash-fill me-1"
+                                                th:attr="data-index=${detailStat.index}"
+                                                onclick="deleteRow(this)"></button>
+                                        <div class="dropdown">
+                                            <button type="button" th:id="|dropdown_${detailStat.index}|"
+                                                    class="btn btn-light bi-three-dots-vertical" data-bs-toggle="dropdown"
+                                                    aria-expanded="false"></button>
+                                            <ul class="dropdown-menu dropdown-menu-end end-0">
+                                                <li>
+                                                    <a class="dropdown-item" href="#"
+                                                       th:attr="data-index=${detailStat.index}"
+                                                       onclick="addRow(this, 'above')"
+                                                    >
+                                                        <span>Add row above</span>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#"
+                                                       th:attr="data-index=${detailStat.index}"
+                                                       onclick="addRow(this, 'below')"
+                                                    >
+                                                        <span>Add row below</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="position-relative">
+            <button class="btn btn-primary mb-5" type="submit" name="action" value="request"
+                    th:if="${request.getId() == null}">Request
+            </button>
+            <button class="btn btn-primary mb-5" type="submit" name="action" value="update"
+                    th:if="${request.stage == 'Requested'}">Modify
+            </button>
+            <button class="btn btn-primary mb-5" id="authorizeBtn" type="submit" name="action" value="authorize"
+                    th:if="${request.stage == 'Requested'}">Authorize
+            </button>
+            <button class="btn btn-primary mb-5" type="submit" name="action" value="approve"
+                    th:if="${request.stage == 'Authorized'}">Approve
+            </button>
+            <button class="btn btn-danger mb-5 position-absolute end-0" type="submit" name="action" value="reject"
+                    th:if="${hasApprovePermission && (request.stage == 'Requested' || request.stage == 'Authorized')}">Reject
+            </button>
+        </div>
+    </form>
+    <th:block th:replace="common/toast.html :: toast"/>
+</div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        let applicationId = 0
+        function renderLeave(searchKey, leave) {
+            return `
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <span>${leave.applicant.nameEn} - ${leave.applicant.designationName}</span><br>
+                        <span>${leave.applicant.branchName} (${leave.applicant.departmentName})</span><br>
+                        <span>${leave.leaveFrom} - ${leave.leaveTo}</span>
+                    </div>
+                </div>
+            `
+        }
+
+        function selectLeave(searchInput, leave) {
+            const dept = leave.applicant.departmentName
+            const from = leave.leaveFrom
+            const to = leave.leaveTo
+            const days = leave.leaveDays
+
+            document.getElementById("applicationId").value = leave.id
+            document.getElementById("employeeName").innerText = leave.applicant.nameEn
+            document.getElementById("employeeDesignation").innerText = leave.applicant.designationName
+            document.getElementById("employeeC/B/C").innerText = leave.applicant.branchName + (dept !== null ? ` (${dept})` : '')
+            document.getElementById("employeePhone").innerText = leave.applicant.primaryPhone
+            document.getElementById("durationText").innerText = `${from.toLocaleString()} - ${to.toLocaleString()} (${days} Days)`
+            document.getElementById("leaveReason").innerText = leave.leaveReason
+
+            const tbody = document.getElementById('dynamicTbody')
+            const data = leave.leaveDetails
+            const types = /*[[${leaveTypes}]]*/ null
+            let rows = ``
+
+            for (const [index, item] of data.entries()) {
+                rows += `
+                    <tr>
+                        <td>
+                            <input type="hidden" name="oldDetails[${index}].id" id="oldDetails_${index}_id">
+                            <input type="hidden" name="oldDetails[${index}].leaveType" id="oldDetails_${index}_leaveType" value="${item.leaveType}">
+                            <input type="text" class="form-control-plaintext" value="${types[item.leaveType]}">
+                        </td>
+                        <td>
+                            <input type="hidden" name="oldDetails[${index}].dateFrom" id="oldDetails_${index}_dateFrom" value="${item.dateFrom}">
+                            <input type="hidden" name="oldDetails[${index}].dateTo" id="oldDetails_${index}_dateTo" value="${item.dateTo}">
+                            <input type="text" class="form-control-plaintext text-center" value="${item.dateFrom.toLocaleString()} - ${item.dateTo.toLocaleString()}">
+                        </td>
+                        <td>
+                            <input type="hidden" name="oldDetails[${index}].days" id="oldDetails_${index}_days" value="${item.days}">
+                            <input type="text" class="form-control-plaintext text-center" value="${item.days}">
+                        </td>
+                    </tr>
+                `
+            }
+            tbody.innerHTML = rows
+
+            applicationId = leave.id
+            document.querySelectorAll('.application-id').forEach(el => el.value = leave.id)
+
+            showLeaveBalance(leave.applicant.id)
+        }
+
+        function clearEmployee() {
+            document.getElementById("applicationId").value = ""
+            document.getElementById("employeeName").innerText = ""
+            document.getElementById("employeeDesignation").innerText = ""
+            document.getElementById("employeeC/B/C").innerText = ""
+            document.getElementById("employeePhone").innerText = ""
+            document.getElementById("durationText").innerText = ""
+            document.getElementById("leaveReason").innerText = ""
+            document.querySelector(".leaveSearch").value = ""
+            document.getElementById('dynamicTbody').innerHTML = ''
+            document.querySelector('#notification').innerHTML = ''
+            applicationId = 0
+            document.querySelectorAll('.application-id').forEach(el => el.value = 0)
+            document.querySelector(".leaveSearch").focus()
+        }
+
+        let interval;
+
+        function leaveDuration() {
+            interval = setInterval(() => {
+                const start = document.querySelector("#toDate").value;
+                const end = document.querySelector("#fromDate").value;
+
+                if (start !== "" && end !== "") {
+                    const from = start.split("/");
+                    const to = end.split("/");
+
+                    const fromDate = new Date(`${from[2]}-${from[1]}-${from[0]}`);
+                    const toDate = new Date(`${to[2]}-${to[1]}-${to[0]}`);
+                    const leaveDays = Math.abs((toDate.getTime() - fromDate.getTime()) / 86400000) + 1;
+
+                    document.querySelector("#leaveDuration").innerHTML = `Total ${leaveDays} Day(s)`;
+                    document.querySelector("#leaveDays").value = leaveDays;
+                }
+            }, 100);
+        }
+
+        function detailsDuration(index) {
+            interval = setInterval(() => {
+                const start = document.querySelector(`#leavesTypeFromDate_${index}`).value;
+                const end = document.querySelector(`#leavesTypeToDate_${index}`).value;
+
+                if (start !== "" && end !== "") {
+                    const from = start.split("/");
+                    const to = end.split("/");
+
+                    const fromDate = new Date(`${from[2]}-${from[1]}-${from[0]}`);
+                    const toDate = new Date(`${to[2]}-${to[1]}-${to[0]}`);
+                    document.querySelector(`#days_${index}`).value = Math.abs((toDate.getTime() - fromDate.getTime()) / 86400000) + 1;
+                }
+            }, 100);
+        }
+
+        function stopInterval() {
+            clearInterval(interval);
+        }
+
+        function showLeaveBalance(empId) {
+            const url = '/leave-balance'
+            fetch(generateRequestURL(url, {empId: empId}))
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('#notification').innerHTML = data['message']
+                })
+        }
+
+        function whatNext(el) {
+            el.addEventListener('keydown', (e) => {
+                if (e.keyCode === 9) {
+                    const rows = document.querySelectorAll('.leaveDetailsRow');
+                    if (+el.dataset.index === rows.length - 1) {
+                        addDefaultEmptyRow();
+                    }
+                    setTimeout(() => {
+                        if (el.dataset.index !== undefined && !isNaN(+el.dataset.index)) {
+                            document.querySelector(`#leaveTypes_${+el.dataset.index + 1}`).focus();
+                        }
+                    }, 5);
+                }
+            });
+        }
+
+        function createEmptyRow() {
+            const typeMap = /*[[${leaveTypes}]]*/ null;
+            let options = ``;
+            for (const [k, v] of Object.entries(typeMap)) {
+                options += `<option value='${k}'>${v}</option>`
+            }
+            const rows = document.querySelectorAll('.leaveDetailsRow');
+            const lastIndex = rows.length;
+
+            const rowElement = document.createElement('tr');
+            rowElement.setAttribute('id', `row_${lastIndex}`);
+            rowElement.classList.add('leaveDetailsRow');
+
+            const row = ` <td>
+                                <input type="hidden" class="application-id" name="updateDetails[${lastIndex}].applicationId" value="${applicationId}">
+                                <select class="form-select leaveTypeOption" id="leaveTypes_${lastIndex}"
+                                name="updateDetails[${lastIndex}].leaveType" data-index="${lastIndex}">
+                                    ${options}
+                                </select>
+                            </td>
+                            <td>
+                                <input class="form-control fromDate" data-index="${lastIndex}" name="updateDetails[${lastIndex}].dateFrom"
+                                id="|leavesTypeFromDate_${lastIndex}|" type="text" onblur="stopInterval()" onclick="detailsDuration(${lastIndex})" required>
+                            </td>
+                            <td>
+                                <input class="form-control toDate" data-index="${lastIndex}" name="updateDetails[${lastIndex}].dateTo"
+                                id="|leavesTypeToDate_${lastIndex}|" type="text" onblur="stopInterval()" onclick="detailsDuration(${lastIndex})" required>
+                            </td>
+                            <td>
+                                <input class="form-control leaveDays" data-index="${lastIndex}" name="updateDetails[${lastIndex}].days" id="|days_${lastIndex}|" type="text" required>
+                            </td>
+                            <td>
+                                <input class="form-control remarks" data-index="${lastIndex}" name="updateDetails[${lastIndex}].remarks" type="text">
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-danger bi-trash-fill me-1" data-index="${lastIndex}" onclick="deleteRow(this)"></button>
+                                    <div class="dropdown">
+                                        <button type="button" id="dropdown_${lastIndex}" class="btn btn-light bi-three-dots-vertical" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                                        <ul class="dropdown-menu dropdown-menu-end end-0">
+                                            <li>
+                                            <a class="dropdown-item" href="#"
+                                            data-index="${lastIndex}"
+                                            onclick="addRow(this, 'above')"
+                                                >
+                                                <span>Add row above</span>
+                                            </a>
+                                            </li>
+                                            <li>
+                                            <a class="dropdown-item" href="#"
+                                            data-index="${lastIndex}"
+                                            onclick="addRow(this, 'below')"
+                                                >
+                                                <span>Add row below</span>
+                                            </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>`;
+
+            rowElement.innerHTML = row;
+
+            const forTab = rowElement.querySelector('.remarks');
+            whatNext(forTab);
+
+            const dropdown = rowElement.querySelector(`#dropdown_${lastIndex}`);
+            new BSN.Dropdown(dropdown);
+
+            return rowElement;
+        }
+
+        function addRow(el, where) {
+            const body = document.querySelector('#leavesDetailsTable').tBodies[0];
+            const currentRow = document.querySelector(`#row_${el.dataset.index}`);
+            const newRow = createEmptyRow();
+
+            if (where === 'above') {
+                body.insertBefore(newRow, currentRow);
+            } else {
+                const rows = document.querySelectorAll('.leaveDetailsRow');
+
+                if (+el.dataset.index === rows.length - 1) {
+                    addDefaultEmptyRow();
+                } else {
+                    body.insertBefore(newRow, currentRow.nextSibling);
+                }
+            }
+            reindex();
+            setTimeout(() => {
+                newRow.querySelector(`.leaveTypeOption`).focus();
+            }, 5);
+        }
+
+        function reindex() {
+            const rows = document.querySelectorAll('.leaveDetailsRow');
+
+            let index = 0;
+            for (const row of rows) {
+                row.setAttribute('id', `row_${index}`);
+
+                const application = row.querySelector('.application-id');
+                application.name = `updateDetails[${index}].applicationId`;
+
+                const type = row.querySelector('.leaveTypeOption');
+                type.setAttribute('id', `leaveTypes_${index}`);
+                type.name = `updateDetails[${index}].leaveType`;
+
+                const dateFrom = row.querySelector('.fromDate');
+                dateFrom.setAttribute('id', `leavesTypeFromDate_${index}`);
+                dateFrom.name = `updateDetails[${index}].dateFrom`;
+                applyDatepicker(dateFrom, dateFrom.value);
+
+                const dateTo = row.querySelector('.toDate');
+                dateTo.setAttribute('id', `leavesTypeToDate_${index}`);
+                dateTo.name = `updateDetails[${index}].dateTo`;
+                dateTo.setAttribute('onblur', `detailsDuration(${index})`);
+                applyDatepicker(dateTo, dateTo.value);
+
+                const days = row.querySelector('.leaveDays');
+                days.setAttribute('id', `days_${index}`);
+                days.name = `updateDetails[${index}].days`;
+
+                const remarks = row.querySelector('.remarks');
+                remarks.setAttribute('id', `remarks_${index}`);
+                remarks.name = `updateDetails[${index}].remarks`;
+
+                const deleteBtn = row.querySelector('.bi-trash-fill');
+                deleteBtn.dataset.index = `${index}`;
+                deleteBtn.style.visibility = rows.length > 1 ? 'visible' : 'hidden';
+
+                const addRow = row.querySelector('.bi-three-dots-vertical');
+                addRow.setAttribute('id', `dropdown_${index}`);
+
+                const addRowMenu = row.querySelectorAll('.dropdown-item');
+                addRowMenu[0].dataset.index = `${index}`;
+                addRowMenu[1].dataset.index = `${index}`;
+
+                index++;
+            }
+        }
+
+        function addDefaultEmptyRow() {
+            const row = createEmptyRow();
+
+            const body = document.querySelector('#leavesDetailsTable').tBodies[0];
+            body.appendChild(row);
+            reindex();
+
+            setTimeout(() => {
+                row.querySelector(`.leaveDetailsRow`)
+            }, 5);
+        }
+
+        function deleteRow(el) {
+            document.querySelector(`#row_${el.dataset.index}`).remove();
+            reindex();
+        }
+
+        (() => {
+            const fromDate = document.querySelectorAll(".fromDate");
+            fromDate.forEach(el => {
+                applyDatepicker(el, el.value)
+            })
+
+            const toDate = document.querySelectorAll(".toDate");
+            toDate.forEach(el => {
+                applyDatepicker(el, el.value)
+            })
+
+            const leave = document.querySelectorAll(".leaveSearch");
+            for (const el of leave) {
+                new AutoComplete(el, renderLeave, selectLeave)
+            }
+
+            const forTab = document.querySelectorAll('.remarks');
+            for (const el of forTab) {
+                whatNext(el);
+            }
+
+            const rows = document.querySelectorAll('.leaveDetailsRow');
+            if (!rows || rows.length <= 0) {
+                addDefaultEmptyRow();
+            }
+        })();
+    </script>
+</th:block>
+</body>
+</html>

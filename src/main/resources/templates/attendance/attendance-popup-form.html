@@ -1,0 +1,39 @@
+<th:block th:object="${attendance}" xmlns:th="http://www.thymeleaf.org">
+    <input type="hidden" th:field="*{id}">
+    <input type="hidden" th:field="*{employee.id}">
+    <input type="hidden" th:field="*{attendanceDate}">
+    <input type="hidden" th:field="*{attendanceStatus}">
+    <input type="hidden" th:field="*{cl}">
+    <input type="hidden" th:field="*{yr}">
+    <div class="row mb-1">
+        <label class="col-sm-3">Employee Name</label>
+        <span class="col-sm-9 fw-bold" th:text="${attendance.employee.nameEn}"></span>
+    </div>
+    <div class="row mb-1">
+        <label class="col-sm-3">Registration No</label>
+        <span class="col-sm-9 fw-bold" th:text="${attendance.employee.regCode}"></span>
+    </div>
+    <div class="row mb-1">
+        <label class="col-sm-3">Designation</label>
+        <span class="col-sm-9 fw-bold" th:text="${attendance.employee.designationName}"></span>
+    </div>
+    <div class="row mb-1">
+        <label class="col-sm-3">Attendance Date</label>
+        <span class="col-sm-9 fw-bold" th:text="${attendance.attendanceDate}"></span>
+    </div>
+    <div class="row mb-1">
+        <label class="col-sm-3">Leave Details</label>
+        <span class="col-sm-9 fw-bold" th:text="'CL : ' + ${attendance.cl} + ', YR : ' + ${attendance.yr} "></span>
+    </div>
+    <div class="row mb-1">
+        <label class="col-sm-3">Attendance Type</label>
+        <span class="col-sm-9 fw-bold">
+            <select th:field="*{attendanceType}">
+                <option th:each="l : ${attendanceTypeMap}"
+                        th:value="${l.key}"
+                        th:text="${l.value}"
+                ></option>
+            </select>
+        </span>
+    </div>
+</th:block>
